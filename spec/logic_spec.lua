@@ -1,0 +1,518 @@
+local array_mt = {}
+local function array(...)
+    return setmetatable({unpack(arg)}, array_mt)
+end
+local function is_array(tab)
+    return getmetatable(tab) == array_mt
+end
+
+local logic = require('logic')
+local function logic_apply(lgc, data, options)
+    if type(options) ~= 'table' or options == nil then
+        options = {}
+    end
+    options.is_array = is_array
+    return logic.apply(lgc, data, options)
+end
+
+describe(
+    "json-logic 'var' testing",
+    function()
+        local kv_data = {attr1 = 'val1', attr2 = 'val2', sub_attr = {attr = 'val1'}}
+        local arr_data = array('val1', 'val2', array('val1'))
+        local str_data = 'other data'
+        local num_data = 2
+        local def_data = 'test'
+
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                assert.message('failed at index: ' .. i).are.equal(t.expected, logic_apply({var = t.params}, t.data))
+            end
+        end
+
+        describe(
+            'given key-valued or arrary data and a key or index (starting from zero)',
+            function()
+                it(
+                    'should return the value of the coresponding key or index',
+                    function()
+                        local test_table = {
+                            {data = kv_data, params = 'attr1', expected = kv_data.attr1},
+                            {data = kv_data, params = 'attr2', expected = kv_data.attr2},
+                            {data = kv_data, params = 'sub_attr', expected = kv_data.sub_attr},
+                            {data = kv_data, params = 'sub_attr.attr1', expected = kv_data.sub_attr.attr1},
+                            {data = kv_data, params = array('attr1'), expected = kv_data.attr1},
+                            {data = kv_data, params = array('attr2'), expected = kv_data.attr2},
+                            {data = kv_data, params = array('sub_attr'), expected = kv_data.sub_attr},
+                            {data = kv_data, params = array('sub_attr.attr1'), expected = kv_data.sub_attr.attr1},
+                            {data = arr_data, params = 0, expected = arr_data[1]},
+                            {data = arr_data, params = 1, expected = arr_data[2]},
+                            {data = arr_data, params = 2, expected = arr_data[3]},
+                            {data = arr_data, params = array(0), expected = arr_data[1]},
+                            {data = arr_data, params = array(1), expected = arr_data[2]},
+                            {data = arr_data, params = array(2), expected = arr_data[3]}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+
+                it(
+                    'should return nil when the key or index are not found in data',
+                    function()
+                        local test_table = {
+                            {data = kv_data, params = 'attr3', expected = nil},
+                            {data = kv_data, params = 'attr12', expected = nil},
+                            {data = kv_data, params = array('attr3'), expected = nil},
+                            {data = kv_data, params = array('attr10'), expected = nil},
+                            {data = arr_data, params = 3, expected = nil},
+                            {data = arr_data, params = 4, expected = nil},
+                            {data = arr_data, params = array(100), expected = nil},
+                            {data = arr_data, params = (50), expected = nil}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+
+        describe(
+            'given data but without key or index',
+            function()
+                it(
+                    'should return the whole data',
+                    function()
+                        local test_table = {
+                            -- "" is the only way to denote the absent of key or index
+                            -- using nil will result in the logic becomes an empty table
+                            {data = kv_data, params = '', expected = kv_data},
+                            {data = arr_data, params = '', expected = arr_data},
+                            {data = str_data, params = '', expected = str_data},
+                            {data = num_data, params = '', expected = num_data},
+                            -- unless ofcourse using nil wrapped in arr_data
+                            {data = kv_data, params = array(), expected = kv_data},
+                            {data = arr_data, params = array(), expected = arr_data},
+                            {data = str_data, params = array(''), expected = str_data},
+                            {data = num_data, params = array(''), expected = num_data}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+
+        describe(
+            'given key-valued or array data, a key or index (starting from zero), and a default value',
+            function()
+                it(
+                    'should return the value of the coresponding key or index',
+                    function()
+                        local test_table = {
+                            {data = kv_data, params = array('attr1', def_data), expected = kv_data.attr1},
+                            {data = kv_data, params = array('attr2', def_data), expected = kv_data.attr2},
+                            {data = arr_data, params = array(0, def_data), expected = arr_data[1]},
+                            {data = arr_data, params = array(1, def_data), expected = arr_data[2]}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+
+                it(
+                    'should return the default value when the key or index are not found in data',
+                    function()
+                        local test_table = {
+                            {data = kv_data, params = array('attr3', def_data), expected = def_data},
+                            {data = kv_data, params = array('attr100', def_data), expected = def_data},
+                            {data = arr_data, params = array(3, def_data), expected = def_data},
+                            {data = arr_data, params = array(90, def_data), expected = def_data}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    "json-logic 'missing' testing",
+    function()
+        local test_table = {
+            {data = {a = 'apple', c = 'carrot'}, params = array(), expected = {}},
+            {data = {a = 'apple', c = 'carrot'}, params = array('a', 'c'), expected = {}},
+            {data = {a = 'apple', c = 'carrot', d = 'dragonfruit'}, params = array('a', 'c'), expected = {}},
+            {data = array('apple', 'carrot'), params = array(), expected = {}},
+            {data = array('apple', 'carrot'), params = array(0, 1), expected = {}},
+            {data = array('apple', 'carrot', 'dragonfruit'), params = array(0, 2), expected = {}},
+            {data = {}, params = array('a', 'c'), expected = {'a', 'c'}},
+            {data = {a = 'apple'}, params = array('a', 'c'), expected = {'c'}},
+            {data = {a = 'apple', c = 'carrot'}, params = array('a', 'b'), expected = {'b'}},
+            {data = {a = 'apple'}, params = array('a', 'b', 'c'), expected = {'b', 'c'}},
+            {data = {a = 'apple'}, params = array('a', 'b', {'c', 'd'}), expected = {'b', {'c', 'd'}}},
+            {data = {a = 'apple'}, params = array('a', {c = 'c'}), expected = {{c = 'c'}}},
+            {data = {a = 'apple'}, params = array('a', {c = 'c', d = 'd'}), expected = {{c = 'c', d = 'd'}}},
+            {data = array(), params = array(0, 1), expected = {0, 1}},
+            {data = array('apple'), params = array(0, 1), expected = {1}},
+            {data = array('apple', 'carrot'), params = array(0, 2), expected = {2}},
+            {data = array('apple'), params = array(0, 1, 2), expected = {1, 2}},
+            {data = array('apple'), params = array(0, 1, array({0, 1})), expected = {1, array({0, 1})}},
+            {data = array('apple'), params = array(0, {c = 'c'}), expected = {{c = 'c'}}},
+            {data = array('apple'), params = array(0, {c = 'c', d = 'd'}), expected = {{c = 'c', d = 'd'}}}
+        }
+
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply({missing = t.params}, t.data)
+                assert.message('failed at index: ' .. i).is_true(logic.is_array(res))
+                assert.message('failed at index: ' .. i).are.same(t.expected, res)
+            end
+        end
+
+        describe(
+            'given data and a list of keys/indices (maybe empty)',
+            function()
+                it(
+                    'should return list of keys/indices (maybe empty) that are not available (missing) on the given data',
+                    function()
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given data and a list that contain a list of keys/indices (maybe empty)',
+            function()
+                it(
+                    'should return list of keys/indices (maybe empty) that are not available (missing) on the given data',
+                    function()
+                        for _, t in ipairs(test_table) do
+                            t.params = array(t.params)
+                        end
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    "json-logic 'missing-some' test",
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply({missing_some = t.params}, t.data)
+                assert.message('failed at index: ' .. i).is_true(logic.is_array(res))
+                assert.message('failed at index: ' .. i).are.same(t.expected, res)
+            end
+        end
+
+        describe(
+            'given data, a list of keys/indices (maybe empty), and minimum number of keys/indices required',
+            function()
+                it(
+                    'should return empty array if minimum number of keys/indices met',
+                    function()
+                        local test_table = {
+                            {data = {}, params = array(0, array('a', 'b', 'c')), expected = array()},
+                            {data = {a = 'apple'}, params = array(1, array()), expected = array()},
+                            {data = {a = 'apple'}, params = array(1, array('a', 'b', 'c', 'd')), expected = array()},
+                            {
+                                data = {a = 'apple', c = 'carrot'},
+                                params = array(2, array('a', 'b', 'c', 'd')),
+                                expected = array()
+                            },
+                            {
+                                data = {a = 'apple', sub = {a = 'apple', b = 'berry'}},
+                                params = array(3, array('a', 'sub.a', 'sub.b')),
+                                expected = array()
+                            }
+                        }
+                        logic_test(test_table)
+                        -- do test
+                    end
+                )
+
+                it(
+                    'should return list of missing keys/indices if requirement is not met',
+                    function()
+                        local test_table = {
+                            {
+                                data = {a = 'apple', c = 'carrot'},
+                                params = array(3, array('a', 'b', 'c', 'd')),
+                                expected = array('b', 'd')
+                            },
+                            {
+                                data = {},
+                                params = array(2, array('a', 'b', 'c', 'd')),
+                                expected = array('a', 'b', 'c', 'd')
+                            },
+                            {
+                                data = {a = 'apple'},
+                                params = array(2, array('a', 'b', 'c', 'd')),
+                                expected = array('b', 'c', 'd')
+                            }
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    "json-logic 'if' test",
+    function()
+        local truthee = {}
+        local falsee = {}
+        assert.are_not.equals(truthee, falsee)
+
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local lgc = {}
+                lgc['if'] = t.params
+                local res = logic_apply(lgc, t.data)
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe(
+            'given array containing condition and two values ',
+            function()
+                it(
+                    'should return the first value when condition true',
+                    function()
+                        local test_table = {
+                            {params = array(true, 'true', 'false'), expected = 'true'},
+                            {params = array(true, truthee, falsee), expected = truthee}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    'should return the second value when condition false',
+                    function()
+                        local test_table = {
+                            {params = array(false, 'true', 'false'), expected = 'false'},
+                            {params = array(false, truthee, falsee), expected = falsee}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+
+        describe(
+            'given falsy-javascript value',
+            function()
+                -- https://developer.mozilla.org/en-US/docs/Glossary/Falsy
+                it(
+                    'should treat it as false condition ',
+                    function()
+                        local test_table = {
+                            {params = array(false, truthee, falsee), expected = falsee},
+                            {params = array(nil, truthee, falsee), expected = falsee},
+                            {params = array('', truthee, falsee), expected = falsee},
+                            {params = array('', truthee, falsee), expected = falsee},
+                            {params = array(undefined, truthee, falsee), expected = falsee},
+                            {params = array(0, truthee, falsee), expected = falsee},
+                            {params = array(0 / 0, truthee, falsee), expected = falsee}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+
+        describe(
+            'given truthy-javascript value',
+            function()
+                -- https://developer.mozilla.org/en-US/docs/Glossary/Truthy
+                it(
+                    'should treat it as false condition ',
+                    function()
+                        local test_table = {
+                            {params = array(true, truthee, falsee), expected = truthee},
+                            {params = array({}, truthee, falsee), expected = truthee},
+                            {params = array(array(), truthee, falsee), expected = truthee},
+                            {params = array(42, truthee, falsee), expected = truthee},
+                            {params = array('foo', truthee, falsee), expected = truthee},
+                            {params = array(-42, truthee, falsee), expected = truthee},
+                            {params = array(1 / 0, truthee, falsee), expected = truthee},
+                            {params = array(-1 / 0, truthee, falsee), expected = truthee}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+
+        describe(
+            'given more than one actions',
+            function()
+                it(
+                    'should return values next to the first a true condition',
+                    function()
+                        -- do test
+                        local test_table = {
+                            {params = array(false, 'false', true, truthee, falsee), expected = truthee},
+                            {
+                                data = nil,
+                                params = array(false, 'false', false, falsee, true, truthee, falsee),
+                                expected = truthee
+                            },
+                            {
+                                data = nil,
+                                params = array(false, 'false', true, truthee, true, 'true', falsee),
+                                expected = truthee
+                            }
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    'should return the last values when no true condition',
+                    function()
+                        local test_table = {
+                            {params = array(false, 'false', false, falsee, truthee), expected = truthee},
+                            {
+                                params = array(false, 'false', false, falsee, false, falsee, truthee),
+                                expected = truthee
+                            },
+                            {
+                                params = array(
+                                    false,
+                                    falsee,
+                                    nil,
+                                    falsee,
+                                    0,
+                                    falsee,
+                                    '',
+                                    falsee,
+                                    0 / 0,
+                                    falsee,
+                                    undefined,
+                                    falsee,
+                                    truthee
+                                ),
+                                expected = truthee
+                            }
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given not enough values',
+            function()
+                it(
+                    'should return nil when no values are associated with matching condition',
+                    function()
+                        local test_table = {
+                            {params = array(false, 'false'), expected = nil},
+                            {params = array(false, 'false', false, falsee), expected = nil},
+                            {params = array(true), expected = nil},
+                            {params = array(false), expected = nil}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    "json-logic 'and' testing",
+    function()
+        local truthee = {}
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local lgc = {}
+                lgc['and'] = t.params
+                local res = logic_apply(lgc, t.data)
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe(
+            'given a list of parameters',
+            function()
+                it("should return the first falsy parameter or the last one", function ()
+                    local test_table = {
+                        {params = array(), expected = nil},
+                        {params = array(true), expected = true},
+                        {params = array(false), expected = false},
+                        {params = array(true, true), expected = true},
+                        {params = array(true, false), expected = false},
+                        {params = array(false, true), expected = false},
+                        {params = array(false, false), expected = false},
+                        {params = array(true, 1, "0"), expected = "0"},
+                        {params = array(true, {}, array(), truthee), expected = truthee},
+                        {params = array(true, "1", 1, false), expected = false},
+                        {params = array('',true, true), expected = ''},
+                        {params = array(true, "", true), expected = ""},
+                        {params = array(true, true, 0), expected = 0},
+                        {params = array(true, nil, 0), expected = nil},
+                        {params = array(undefined, nil, 0), expected = undefined},
+                    }
+                    logic_test(test_table)
+                end)
+            end
+        )
+    end
+)
+
+describe(
+    "json-logic 'or' testing",
+    function()
+        local truthee = {}
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local lgc = {}
+                lgc['or'] = t.params
+                local res = logic_apply(lgc, t.data)
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe(
+            'given a list of parameters',
+            function()
+                it("should return the first truthy parameter or the last one", function ()
+                    local test_table = {
+                        {params = array(), expected = nil},
+                        {params = array(true), expected = true},
+                        {params = array(false), expected = false},
+                        {params = array(true, true), expected = true},
+                        {params = array(true, false), expected = true},
+                        {params = array(false, true), expected = true},
+                        {params = array(false, false), expected = false},
+                        {params = array(true, 1, "0"), expected = true},
+                        {params = array( truthee, true, {}, array()), expected = truthee},
+                        {params = array( "1", 1, true, false), expected = "1"},
+                        {params = array( false, 0, '', 0), expected = 0},
+                        {params = array( false, 0, undefined, ''), expected = ''},
+                        {params = array( false, 0, 0/0, ""), expected = ""},
+                    }
+                    logic_test(test_table)
+                end)
+            end
+        )
+    end
+)
+
+describe("json-logic 'filter' test", function ()
+    local function logic_test(test_table)
+        for i, t in ipairs(test_table) do
+            local res = logic_apply({filter = t.params}, t.data)
+            assert.message('failed at index: ' .. i).are.same(t.expected, res)
+        end
+    end
+    local mod = {}
+    mod["%"] = array({var = ""},2)
+    local equal = {}
+    equal["=="] = array(mod, true)
+    local test_table = {
+        {data = {integers = array(1,2,3,4,5)}, params = array({var = "integers"}, equal), expected = {1,3,5}},
+    }
+    logic_test(test_table)
+end)
