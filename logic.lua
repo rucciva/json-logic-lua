@@ -763,6 +763,9 @@ function JsonLogic.apply(logic, data, options)
                 end
                 if current.state.result == nil then
                     current.state.result = array()
+                    for i,_ in pairs(current.logic[op]) do
+                        current.state.result[i] = 0
+                    end
                 end
                 --
 
@@ -806,7 +809,7 @@ function JsonLogic.apply(logic, data, options)
                     }
                     break
                 end
-                table.insert(current.state.result, last_child_result)
+                current.state.result[current.state.index]= last_child_result
                 --
 
                 if current.state.index < current.state.length then

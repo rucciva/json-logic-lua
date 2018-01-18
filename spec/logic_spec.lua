@@ -983,7 +983,7 @@ describe(
     end
 )
 
-describe("json-logic arithmethic test", function ()
+describe("json-logic number test", function ()
     local function logic_test( test_table)
         for i, t in ipairs(test_table) do
             local res = logic_apply(logic.new_logic(t.operator, unpack(t.params)), t.data)
