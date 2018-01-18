@@ -37,7 +37,7 @@ local function is_logic(tab)
 end
 
 local function js_to_boolean(value)
-    if value == 0 or value == '' or value == '0' then
+    if value == 0 or value == '' or value == "" then
         return false
     end
     if type(value) == 'number' and value ~= value then
@@ -56,7 +56,7 @@ local function js_reducible_array_to_string(value)
         if #newval == 0 then
             return ''
         elseif #newval == 1 then
-            return tostring(#newval[1])
+            return tostring(newval[1])
         end
     end
     return value
@@ -68,9 +68,9 @@ local function js_to_number(value)
     if value == 0 or value == '' or value == '0' or value == false then
         return 0
     end
-    if type(value) == 'table' and #value == 0 then
-        return 0
-    end
+    -- if type(value) == 'table' and #value == 0 then
+    --     return 0
+    -- end
 
     if value == true then
         return 1
@@ -96,7 +96,7 @@ local function js_is_equal(a, b)
         local a_ar = js_reducible_array_to_string(a)
         local b_ar = js_reducible_array_to_string(b)
         if type(a_ar) == 'string' and type(b_ar) == 'string' then
-            return a == b
+            return a_ar == b_ar
         end
     end
 
@@ -104,30 +104,6 @@ local function js_is_equal(a, b)
     local a_num = js_to_number(a)
     local b_num = js_to_number(b)
     return a_num == b_num
-end
-
-local function js_index_of(a, b)
-    if is_array(a) then
-        for i, v in ipairs(a) do
-            if v == b then
-                return i - 1
-            end
-        end
-    elseif type(a) == 'table' then
-        for i, v in pairs(a) do
-            if v == b then
-                return i - 1
-            end
-        end
-    elseif type(a) == 'string' then
-        local i = string.find(a, tostring(b))
-        if i == nil then
-            return -1
-        end
-        return i - 1
-    end
-
-    return -1
 end
 
 local function js_array_to_string(a)
@@ -141,7 +117,6 @@ local function js_array_to_string(a)
         local i = 1
         local fully_iterated = true
         for _, v in pairs(current.table) do
-            print(i, current.index)
             if i >= current.index then
                 if is_array(v) then
                     -- prevent recursive
@@ -189,7 +164,7 @@ local function js_to_string(a)
     elseif type(a) == 'table' then
         -- object
         return '[object object]'
-    end
+    end 
 
     -- others
     return tostring(a)
@@ -206,6 +181,12 @@ local JsonLogic = {}
 
 local operations = {}
 
+operations['!!'] = function(_, a)
+    return js_to_boolean(a)
+end
+operations['!'] = function(_, a)
+    return not js_to_boolean(a)
+end
 operations['=='] = function(_, a, b)
     return js_is_equal(a, b)
 end
@@ -228,50 +209,19 @@ operations['>='] = function(_, a, b)
     b = js_to_number(b)
     return a >= b
 end
-operations['<'] = function(_, a, b)
-    a = js_to_number(a)
-    b = js_to_number(b)
-    return a < b
-end
-operations['<='] = function(_, a, b)
-    a = js_to_number(a)
-    b = js_to_number(b)
-    return a <= b
-end
-operations['!!'] = function(_, a)
-    return js_to_boolean(a)
-end
-operations['!'] = function(_, a)
-    return not js_to_boolean(a)
-end
-operations['log'] = function(_, a)
-    print(a)
-    return a
-end
-operations['in'] = function(_, a, b)
-    return js_index_of(a, b)
-end
-operations['cat'] = function(_, ...)
-    table.remove(arg)
-    return js_to_string(arg)
-end
-operations['join'] = function(_, separator, ...)
-    if not js_to_boolean(separator) then
-        table.remove(arg)
-        return js_to_string(arg)
+operations['<'] = function(_, a, b, c)
+    if c == nil then 
+        return js_to_number(a) < js_to_number(b) 
+    else
+        return js_to_number(a) < js_to_number(b) and  js_to_number(b) < js_to_number(c)
     end
-
-    local res = ''
-    for i, v in ipairs(arg) do
-        if i > 1 then
-            res = res .. js_to_string(separator)
-        end
-        res = res .. js_to_string(v)
-    end
-    return res
 end
-operations['substr'] = function(_, source, st, en)
-    return string.sub(source, st - 1, en - 1)
+operations['<='] = function(_, a, b, c)
+    if c == nil then 
+        return js_to_number(a) <= js_to_number(b) 
+    else
+        return js_to_number(a) <= js_to_number(b) and  js_to_number(b) <= js_to_number(c)
+    end
 end
 operations['+'] = function(_, ...)
     local a = 0
@@ -287,50 +237,84 @@ operations['*'] = function(_, ...)
     end
     return a
 end
-operations['-'] = function(_, ...)
-    local a = 0
-    for i, v in ipairs(arg) do
-        if i == 1 then
-            a = js_to_number(v)
-        else
-            a = a - js_to_number(v)
-        end
+operations['-'] = function(_, a,b)
+    if b == nil then
+        return - js_to_number(a)
     end
+    return js_to_number(a) - js_to_number(b) 
+end
+operations['/'] = function(_, a,b)
+    return js_to_number(a) / js_to_number(b) 
+end
+operations['%'] = function(_, a,b)
+    return js_to_number(a) % js_to_number(b) 
+end
+operations["min"] = function(_, ...)
+    for i,v in ipairs(arg) do
+        v = js_to_number(v)
+        if v ~= v then
+            return nil
+        end
+        arg[i] = v
+    end
+    return math.min( unpack(arg) )
+end
+operations["max"] = function(_, ...)
+    for i,v in ipairs(arg) do
+        v = js_to_number(v)
+        if v ~= v then
+            return nil
+        end
+        arg[i] = v
+    end
+    return math.max( unpack(arg) )
+end
+operations['log'] = function(_, a)
+    print(a)
     return a
 end
-operations['/'] = function(_, ...)
-    local a = 0
-    for i, v in ipairs(arg) do
-        if i == 1 then
-            a = js_to_number(v)
-        else
-            a = a / js_to_number(v)
+operations['in'] = function(_, a, b)
+    if is_array(b) then
+        for i, v in ipairs(b) do
+            if v == a then
+                return true
+            end
         end
+    elseif type(b) == 'table' then
+        for i, v in pairs(b) do
+            if v == a then
+                return true
+            end
+        end
+    elseif type(b) == 'string' then
+        local i = string.find(b, tostring(a))
+        return i ~= nil
     end
-    return a
+
+    return false
 end
-operations['%'] = function(_, ...)
-    local a = 0
-    for i, v in ipairs(arg) do
-        if i == 1 then
-            a = js_to_number(v)
-        else
-            a = a % js_to_number(v)
-        end
+operations['cat'] = function(_, ...)
+    arg["n"] = nil
+    return js_to_string(mark_as_array(arg))
+end
+operations['substr'] = function(_, source, st, en)
+    if st == nil then
+        return source
     end
-    return a
+    if st >= 0 then st = st + 1 end
+    if en == nil then
+        return string.sub(source, st)
+    end
+    if en >= 0 then 
+        en = st + en - 1 
+    else
+        en = string.len( source ) + en
+    end
+    return string.sub(source, st, en)
 end
 operations['merge'] = function(_, ...)
     if #arg < 1 then
         return array()
-    end
-
-    if type(arg[1]) == 'string' then
-        local res = ''
-        for _, v in ipairs(arg) do
-            res = res .. js_to_string(v)
-        end
-        return res
     end
 
     local res = array()
@@ -407,11 +391,38 @@ operations['method'] = function(_, obj, method, ...)
     end
     return nil
 end
+operations['join'] = function(_, separator, ...)
+    if not js_to_boolean(separator) then
+        table.remove(arg)
+        return js_to_string(arg)
+    end
+
+    local res = ''
+    for i, v in ipairs(arg) do
+        if i > 1 then
+            res = res .. js_to_string(separator)
+        end
+        res = res .. js_to_string(v)
+    end
+    return res
+end
+operations["length"] = function(_, obj)
+    if type(obj) == "string" then
+        return string.len( obj )
+    end
+
+    if type(obj) == "table" then
+        return #obj
+    end
+
+    return 0
+end
 
 function JsonLogic.apply(logic, data, options)
     local stack = {}
     local current = {
         logic = logic,
+        logic_normalized = nil,
         data = data,
         state = {}
     }
@@ -429,6 +440,12 @@ function JsonLogic.apply(logic, data, options)
             end
             -- recurse array or primitive
             if is_array(current.logic) then
+                if not current.logic_normalized then
+                    current.logic_normalized = array()
+                    for i,_ in pairs(current.logic) do
+                        current.logic_normalized[i] = 0
+                    end
+                end
                 -- zero length
                 if #current.logic == 0 then
                     last_child_result = array()
@@ -464,7 +481,7 @@ function JsonLogic.apply(logic, data, options)
                     }
                     break
                 end
-                current.logic[current.state.index] = last_child_result
+                current.logic_normalized[current.state.index] = last_child_result
                 --
 
                 -- process next item if available
@@ -473,7 +490,9 @@ function JsonLogic.apply(logic, data, options)
                     break
                 end
 
-            -- continue to primitive test
+                last_child_result = current.logic_normalized
+                current = table.remove(stack)
+                break
             end
 
             -- You've recursed to a primitive, stop!
@@ -486,6 +505,9 @@ function JsonLogic.apply(logic, data, options)
 
             current.data = current.data or {}
             local op = get_operator(current.logic)
+            if current.logic_normalized == nil then
+                current.logic_normalized = {}; current.logic_normalized[op] = {}
+            end
             -- check for blacklist or non-whitelisted operations
             if type(options.blacklist) == 'table' and options.blacklist[op] then
                 return current.logic, 'blacklisted operations'
@@ -493,14 +515,6 @@ function JsonLogic.apply(logic, data, options)
                 return current.logic, 'non-whitelisted operations'
             end
             --
-            if type(options.is_array) == 'function' and options.is_array(current.logic[op]) then
-                mark_as_array(current.logic[op])
-            end
-            local val = current.logic[op]
-            if not is_array(val) then
-                -- easy syntax for unary operators, like {"var" : "x"} instead of strict {"var" : ["x"]}
-                val = mark_as_array({current.logic[op]})
-            end
 
             -- 'if', 'and', and 'or' violate the normal rule of depth-first calculating consequents,
             -- let each manage recursion as needed.
@@ -518,7 +532,7 @@ function JsonLogic.apply(logic, data, options)
                 -- given 0 parameters, return NULL (not great practice, but there was no Else)
 
                 -- zero ore one length
-                if #val <= 1 then
+                if #current.logic[op] <= 1 then
                     last_child_result = nil
                     current = table.remove(stack)
                     break
@@ -526,7 +540,7 @@ function JsonLogic.apply(logic, data, options)
 
                 -- state initialization
                 if current.state.length == nil then
-                    current.state.length = #val
+                    current.state.length = #current.logic[op]
                 end
                 if current.state.index == nil then
                     current.state.index = 1
@@ -541,30 +555,30 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[current.state.index],
+                        logic = current.logic[op][current.state.index],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
-                val[current.state.index] = last_child_result
+                current.logic_normalized[op][current.state.index] = last_child_result
                 --
 
                 if current.state.index % 2 == 1 and current.state.index < current.state.length then
                     -- processing conditions
-                    if js_to_boolean(val[current.state.index]) then
+                    if js_to_boolean(current.logic_normalized[op][current.state.index]) then
                         current.state.index = current.state.index + 1
                     else
                         current.state.index = current.state.index + 2
                     end
                 else
-                    last_child_result = val[current.state.index]
+                    last_child_result = current.logic_normalized[op][current.state.index]
                     current = table.remove(stack)
                 end
                 break
             elseif op == 'and' then
                 -- zero length
-                if #val == 0 then
+                if #current.logic[op] == 0 then
                     last_child_result = nil
                     current = table.remove(stack)
                     break
@@ -572,7 +586,7 @@ function JsonLogic.apply(logic, data, options)
 
                 -- state initialization
                 if current.state.length == nil then
-                    current.state.length = #val
+                    current.state.length = #current.logic[op]
                 end
                 if current.state.index == nil then
                     current.state.index = 1
@@ -587,27 +601,30 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[current.state.index],
+                        logic = current.logic[op][current.state.index],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
-                val[current.state.index] = last_child_result
+                current.logic_normalized[op][current.state.index] = last_child_result
                 --
 
-                if js_to_boolean(val[current.state.index]) and current.state.index < current.state.length then
+                if
+                    js_to_boolean(current.logic_normalized[op][current.state.index]) and
+                        current.state.index < current.state.length
+                 then
                     -- if true then continue next
                     current.state.index = current.state.index + 1
                 else
                     -- false or the last element
-                    last_child_result = val[current.state.index]
+                    last_child_result = current.logic_normalized[op][current.state.index]
                     current = table.remove(stack)
                 end
                 break
             elseif op == 'or' then
                 -- zero length
-                if #val == 0 then
+                if #current.logic[op] == 0 then
                     last_child_result = nil
                     current = table.remove(stack)
                     break
@@ -615,7 +632,7 @@ function JsonLogic.apply(logic, data, options)
 
                 -- state initialization
                 if current.state.length == nil then
-                    current.state.length = #val
+                    current.state.length = #current.logic[op]
                 end
                 if current.state.index == nil then
                     current.state.index = 1
@@ -630,28 +647,31 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[current.state.index],
+                        logic = current.logic[op][current.state.index],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
-                val[current.state.index] = last_child_result
+                current.logic_normalized[op][current.state.index] = last_child_result
                 --
 
-                if not js_to_boolean(val[current.state.index]) and current.state.index < current.state.length then
+                if
+                    not js_to_boolean(current.logic_normalized[op][current.state.index]) and
+                        current.state.index < current.state.length
+                 then
                     -- if true then continue next
                     current.state.index = current.state.index + 1
                 else
                     -- false or the last element
-                    last_child_result = val[current.state.index]
+                    last_child_result = current.logic_normalized[op][current.state.index]
                     current = table.remove(stack)
                 end
                 break
             elseif op == 'filter' then
                 -- zero length
-                if #val == 0 then
-                    last_child_result = array()
+                if #current.logic[op] == 0 then
+                    last_child_result = nil
                     current = table.remove(stack)
                     break
                 end
@@ -679,27 +699,31 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[1],
+                        logic = current.logic[op][1],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
+                if not current.state.assigned and type(last_child_result) ~= "table" then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.assigned then
                     current.state.assigned = true
-                    val[1] = last_child_result
-                    current.state.length = #val[1]
+                    current.logic_normalized[op][1] = last_child_result
+                    current.state.length = #current.logic_normalized[op][1]
                 end
-                local scoped_data = val[1]
+                local scoped_data = current.logic_normalized[op][1]
                 --
 
                 -- filter and recurse if necessary
-                local scoped_logic = val[2]
                 if not current.state.filtered[current.state.index] then
                     current.state.filtered[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = scoped_logic,
+                        logic = current.logic[op][2],
                         data = scoped_data[current.state.index],
                         state = {}
                     }
@@ -718,16 +742,13 @@ function JsonLogic.apply(logic, data, options)
                 break
             elseif op == 'map' then
                 -- zero length
-                if #val == 0 then
-                    last_child_result = array()
+                if #current.logic[op] == 0 then
+                    last_child_result = nil
                     current = table.remove(stack)
                     break
                 end
 
                 -- state initialization
-                if current.state.length == nil then
-                    current.state.length = #val[1]
-                end
                 if current.state.index == nil then
                     current.state.index = 1
                 end
@@ -750,26 +771,36 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[1],
+                        logic = current.logic[op][1],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
+                if not current.state.assigned and type(last_child_result) ~= "table" then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.assigned then
                     current.state.assigned = true
-                    val[1] = last_child_result
+                    current.logic_normalized[op][1] = last_child_result
+                    current.state.length = #current.logic_normalized[op][1]
                 end
-                local scoped_data = val[1]
+                local scoped_data = current.logic_normalized[op][1]
                 --
 
                 -- map and recurse if necessary
-                local scoped_logic = val[2]
+                if current.state.length < 1 then
+                    last_child_result = array()
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.mapped[current.state.index] then
                     current.state.mapped[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = scoped_logic,
+                        logic = current.logic[op][2],
                         data = scoped_data[current.state.index],
                         state = {}
                     }
@@ -787,16 +818,13 @@ function JsonLogic.apply(logic, data, options)
                 break
             elseif op == 'reduce' then
                 -- zero length
-                if #val == 0 then
-                    last_child_result = array()
+                if #current.logic[op] == 0 then
+                    last_child_result = nil
                     current = table.remove(stack)
                     break
                 end
 
                 -- state initialization
-                if current.state.length == nil then
-                    current.state.length = #val[1]
-                end
                 if current.state.index == nil then
                     current.state.index = 1
                 end
@@ -810,7 +838,7 @@ function JsonLogic.apply(logic, data, options)
                     current.state.reduced = {}
                 end
                 if current.state.result == nil then
-                    current.state.result = val[3]
+                    current.state.result = current.logic[op][3]
                 end
                 --
 
@@ -819,26 +847,36 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[1],
+                        logic = current.logic[op][1],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
+                if not current.state.assigned and type(last_child_result) ~= "table" then
+                    last_child_result = current.state.result
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.assigned then
                     current.state.assigned = true
-                    val[0] = last_child_result
+                    current.logic_normalized[op][1] = last_child_result
+                    current.state.length = #current.logic_normalized[op][1]
                 end
-                local scoped_data = val[1]
+                local scoped_data = current.logic_normalized[op][1]
                 --
 
                 -- filter and recurse if necessary
-                local scoped_logic = val[2]
+                if current.state.length < 1 then
+                    last_child_result = current.state.result
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.reduced[current.state.index] then
                     current.state.reduced[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = scoped_logic,
+                        logic = current.logic[op][2],
                         data = {
                             current = scoped_data[current.state.index],
                             accumulator = current.state.result
@@ -859,16 +897,13 @@ function JsonLogic.apply(logic, data, options)
                 break
             elseif op == 'all' then
                 -- zero length
-                if #val == 0 then
-                    last_child_result = array()
+                if #current.logic[op] == 0 then
+                    last_child_result = nil
                     current = table.remove(stack)
                     break
                 end
 
                 -- state initialization
-                if current.state.length == nil then
-                    current.state.length = #val[1]
-                end
                 if current.state.index == nil then
                     current.state.index = 1
                 end
@@ -888,30 +923,37 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[1],
+                        logic = current.logic[op][1],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
+                if not current.state.assigned and type(last_child_result) ~= "table" then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.assigned then
                     current.state.assigned = true
-                    val[1] = last_child_result
+                    current.logic_normalized[op][1] = last_child_result
+                    current.state.length = #current.logic_normalized[op][1]
                 end
-                local scoped_data = val[1]
+                local scoped_data = current.logic_normalized[op][1]
                 --
 
                 -- filter and recurse if necessary
-                local scoped_logic = val[2]
+                if current.state.length < 1 then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.checked[current.state.index] then
                     current.state.checked[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = scoped_logic,
-                        data = {
-                            current = scoped_data[current.state.index],
-                            accumulator = current.state.result
-                        },
+                        logic = current.logic[op][2],
+                        data = scoped_data[current.state.index],
                         state = {}
                     }
                     break
@@ -927,16 +969,13 @@ function JsonLogic.apply(logic, data, options)
                 break
             elseif op == 'some' then
                 -- zero length
-                if #val == 0 then
-                    last_child_result = array()
+                if #current.logic[op] == 0 then
+                    last_child_result = nil
                     current = table.remove(stack)
                     break
                 end
 
                 -- state initialization
-                if current.state.length == nil then
-                    current.state.length = #val[1]
-                end
                 if current.state.index == nil then
                     current.state.index = 1
                 end
@@ -956,30 +995,37 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[1],
+                        logic = current.logic[op][1],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
+                if not current.state.assigned and type(last_child_result) ~= "table" then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.assigned then
                     current.state.assigned = true
-                    val[0] = last_child_result
+                    current.logic_normalized[op][1] = last_child_result
+                    current.state.length = #current.logic_normalized[op][1]
                 end
-                local scoped_data = val[1]
+                local scoped_data = current.logic_normalized[op][1]
                 --
 
                 -- filter and recurse if necessary
-                local scoped_logic = val[2]
+                if current.state.length < 1 then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.checked[current.state.index] then
                     current.state.checked[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = scoped_logic,
-                        data = {
-                            current = scoped_data[current.state.index],
-                            accumulator = current.state.result
-                        },
+                        logic = current.logic[op][2],
+                        data = scoped_data[current.state.index],
                         state = {}
                     }
                     break
@@ -995,16 +1041,13 @@ function JsonLogic.apply(logic, data, options)
                 break
             elseif op == 'none' then
                 -- zero length
-                if #val == 0 then
-                    last_child_result = array()
+                if #current.logic[op] == 0 then
+                    last_child_result = nil
                     current = table.remove(stack)
                     break
                 end
 
                 -- state initialization
-                if current.state.length == nil then
-                    current.state.length = #val[1]
-                end
                 if current.state.index == nil then
                     current.state.index = 1
                 end
@@ -1024,30 +1067,37 @@ function JsonLogic.apply(logic, data, options)
                     current.state.recursed = true
                     table.insert(stack, current)
                     current = {
-                        logic = val[1],
+                        logic = current.logic[op][1],
                         data = current.data,
                         state = {}
                     }
                     break
                 end
+                if not current.state.assigned and type(last_child_result) ~= "table" then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.assigned then
                     current.state.assigned = true
-                    val[1] = last_child_result
+                    current.logic_normalized[op][1] = last_child_result
+                    current.state.length = #current.logic_normalized[op][1]
                 end
-                local scoped_data = val[1]
+                local scoped_data = current.logic_normalized[op][1]
                 --
 
                 -- filter and recurse if necessary
-                local scoped_logic = val[2]
+                if current.state.length < 1 then
+                    last_child_result = nil
+                    current = table.remove(stack)
+                    break
+                end
                 if not current.state.checked[current.state.index] then
                     current.state.checked[current.state.index] = true
                     table.insert(stack, current)
                     current = {
-                        logic = scoped_logic,
-                        data = {
-                            current = scoped_data[current.state.index],
-                            accumulator = current.state.result
-                        },
+                        logic = current.logic[op][2],
+                        data = scoped_data[current.state.index],
                         state = {}
                     }
                     break
@@ -1068,7 +1118,7 @@ function JsonLogic.apply(logic, data, options)
                 current.state.recursed = {}
                 table.insert(stack, current)
                 current = {
-                    logic = val,
+                    logic = current.logic[op],
                     data = current.data,
                     state = {}
                 }
@@ -1077,16 +1127,15 @@ function JsonLogic.apply(logic, data, options)
             if type(options.is_array) == 'function' and options.is_array(last_child_result) then
                 mark_as_array(last_child_result)
             end
-            val = last_child_result
-            if not is_array(val) then
-                val = mark_as_array({val})
+            current.logic_normalized[op] = last_child_result
+            if not is_array(current.logic_normalized[op]) then
+                current.logic_normalized[op] = mark_as_array({current.logic_normalized[op]})
             end
             --
 
             -- invoke the operator
             if type(operations[op]) == 'function' then
-                current.logic[op] = last_child_result
-                last_child_result = operations[op](current.data, unpack(val))
+                last_child_result = operations[op](current.data, unpack(current.logic_normalized[op]))
             elseif
                 type(op) == 'string' and string.find(op, '.', 1, true) and not string_starts(op, '.') and
                     not string_ends(op, '.')
@@ -1098,8 +1147,7 @@ function JsonLogic.apply(logic, data, options)
                         return current.logic, 'invalid operations'
                     end
                 end
-                current.logic[op] = last_child_result
-                last_child_result = newOP(current.data, unpack(val))
+                last_child_result = newOP(current.data, unpack(current.logic_normalized[op]))
             else
                 last_child_result = current.logic
                 err = 'invalid operations'
@@ -1112,7 +1160,24 @@ function JsonLogic.apply(logic, data, options)
     return last_child_result, err
 end
 
+JsonLogic.new_logic = function (operation, ...)
+    local lgc = {}
+    if operation ~= nil then
+        lgc[operation] = array(unpack(arg))
+    end
+    return lgc
+end
+
+JsonLogic.add_operation = function(name, code)
+    operations[name] = code
+end
+
+JsonLogic.delete_operation = function(name)
+    operations[name] = nil
+end
+
 JsonLogic.array = array
 JsonLogic.is_array = is_array
+JsonLogic.mark_as_array = mark_as_array
 
 return JsonLogic
