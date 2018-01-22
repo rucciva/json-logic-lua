@@ -170,12 +170,6 @@ local function js_to_string(a)
     return tostring(a)
 end
 
-local function get_operator(tab)
-    for k, _ in pairs(tab) do
-        return k
-    end
-    return nil
-end
 
 local operations = {}
 
@@ -443,6 +437,13 @@ operations['length'] = function(_, obj)
     end
 
     return 0
+end
+
+local function get_operator(tab)
+    for k, _ in pairs(tab) do
+        return k
+    end
+    return nil
 end
 
 local recurse_operations = {}
@@ -1124,7 +1125,8 @@ function recurse_array(stack, current, last_child_result)
 end
 
 local JsonLogic = {}
-function JsonLogic.apply(logic, data, options)
+
+JsonLogic.apply = function(logic, data, options)
     local stack = {}
     local current = {
         logic = logic,
