@@ -983,6 +983,51 @@ describe(
     end
 )
 
+describe("json-logic length test", function ()
+    local function logic_test(test_table)
+        for i, t in ipairs(test_table) do
+            local res = logic_apply({length = t.params}, t.data)
+            assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+        end
+    end
+    describe("given table", function ()
+        it("should return number of element in the table", function ()
+            local test_table = {
+                {params = array({}), expected = 0},
+                {params = array({1,2,3,4,5}), expected = 5},
+                {params = array({1,2,3,4,5,{1,2,3,4,5}}), expected = 6},
+                {params = array(array()), expected = 0},
+                {params = array(array(1,2,3,4,5, array(1,2,3,4,5))), expected = 6},
+            }
+            logic_test(test_table)
+        end)
+    end)
+    describe("given string", function ()
+        it("should return the length of the string", function ()
+            local test_table = {
+                {params = array(""), expected = 0},
+                {params = array("12345"), expected = 5},
+                {params = array("1234567890"), expected = 10},
+                {params = "", expected = 0},
+                {params = "12345", expected = 5},
+                {params = "1234567890", expected = 10},
+            }
+            logic_test(test_table)
+        end)
+    end)
+    describe("given parameters other than table and string", function ()
+        it("should return 0", function ()
+            local test_table = {
+                {params = array(1), expected = 0},
+                {params = array(true), expected = 0},
+                {params = 1, expected = 0},
+                {params = true, expected = 0},
+            }
+            logic_test(test_table)
+        end)
+    end)
+end)
+
 describe("json-logic number test", function ()
     local function logic_test( test_table)
         for i, t in ipairs(test_table) do
