@@ -120,7 +120,7 @@ local function js_array_to_string(a)
             local v = current.table[i]
             local str
             if is_array(v) then
-                -- prevent recursive
+                -- prevent recursive loop
                 local recurse = false
                 for _, saved in pairs(stack) do
                     if saved.table == v then
@@ -145,11 +145,13 @@ local function js_array_to_string(a)
             else
                 str = tostring(v)
             end
+            -- add comma between array items
             if first then
                 first = false
             else
                 res = res .. ','
             end
+            --
             res = res .. str
         end
 
