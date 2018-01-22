@@ -983,7 +983,58 @@ describe(
     end
 )
 
-describe("json-logic length test", function ()
+describe(
+    "json-logic 'join' test",
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply({join = t.params}, t.data)
+                assert.message('failed at index: ' .. i).are.same(t.expected, res)
+            end
+        end
+        describe(
+            'given an array and separator',
+            function()
+                it(
+                    'should join all the elements separated by separator into strings',
+                    function()
+                        local test_table = {
+                            {params = array(",", array('')), expected = ""},
+                            {params = array(",", array('Fire')), expected = "Fire"},
+                            {params = array(",", array('Fire', 'Wind', 'Rain')), expected = "Fire,Wind,Rain"},
+                            {params = array(",", array(1, 2, 3)), expected = "1,2,3"},
+                            {params = array("-", array('Fire', 'Wind', 'Rain')), expected = "Fire-Wind-Rain"},
+                            {params = array("-", array(1, 2, 3)), expected = "1-2-3"},
+                            {params = array("-", array(1, 2, 3, array(4,5,6), 7, 8)), expected = "1-2-3-4,5,6-7-8"},
+                            {params = array("-", array(1, 2, 3, array(4,5,6,array(7,8,9),10,11))), expected = "1-2-3-4,5,6,7,8,9,10,11"},
+                            {params = array("-", array(1, 2, 3, array(4,5,6,array(7,8,9, array(10,11))),12,13)), expected = "1-2-3-4,5,6,7,8,9,10,11-12-13"},
+                            {params = array("", array('Fire', 'Wind', 'Rain')), expected = "Fire,Wind,Rain"},
+                            {params = array(nil, array('Fire', 'Wind', 'Rain')), expected = "Fire,Wind,Rain"},
+                            {params = array(array(1,2,3), array(1, 2, 3)), expected = "11,2,321,2,33"},
+                            {params = array(array("a",array("m","n","o"),"z"), array(1, 2, 3)), expected = "1a,m,n,o,z2a,m,n,o,z3"},
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe("given non array", function ()
+            it("should return nil", function ()
+                local test_table = {
+                    {params = array(",", 1), expected = nil},
+                    {params = array(",", "{1,2,3}"), expected = nil},
+                    {params = array(",", {1,2,3}), expected = nil},
+                    {params = array(",", true), expected = nil},
+                    {params = array(","), expected = nil},
+                    {params = array(), expected = nil},
+                }
+                logic_test(test_table)
+            end)
+        end)
+    end
+)
+
+describe("json-logic 'length' test", function ()
     local function logic_test(test_table)
         for i, t in ipairs(test_table) do
             local res = logic_apply({length = t.params}, t.data)

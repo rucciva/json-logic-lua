@@ -113,42 +113,44 @@ local function js_array_to_string(a)
         table = a,
         index = 1
     }
+    local first = true
     while current ~= nil do
-        local i = 1
         local fully_iterated = true
-        for _, v in pairs(current.table) do
-            if i >= current.index then
-                if is_array(v) then
-                    -- prevent recursive
-                    local recurse = false
-                    for _, saved in pairs(stack) do
-                        if saved.table == v then
-                            recurse = true
-                            break
-                        end
-                    end
-                    if recurse then
+        for i = current.index, #current.table, 1 do
+            local v = current.table[i]
+            local str
+            if is_array(v) then
+                -- prevent recursive
+                local recurse = false
+                for _, saved in pairs(stack) do
+                    if saved.table == v then
+                        recurse = true
                         break
                     end
-                    --
-
-                    -- add to stack
-                    current.index = i + 1
-                    table.insert(stack, current)
-                    current = {
-                        table = v,
-                        index = 1
-                    }
-                    fully_iterated = false
-                    --
-                    break
-                elseif type(v) == 'table' then
-                    res = res .. '[object object]'
-                else
-                    res = res .. tostring(v)
                 end
+                if recurse then
+                    break
+                end
+                --
+
+                -- add to stack
+                current.index = i + 1
+                table.insert(stack, current)
+                current = {table = v, index = 1}
+                fully_iterated = false
+                --
+                break
+            elseif type(v) == 'table' then
+                str = '[object object]'
+            else
+                str = tostring(v)
             end
-            i = i + 1
+            if first then
+                first = false
+            else
+                res = res .. ','
+            end
+            res = res .. str
         end
 
         if fully_iterated then
@@ -305,7 +307,11 @@ end
 
 operations['cat'] = function(_, ...)
     arg['n'] = nil
-    return js_to_string(mark_as_array(arg))
+    local res = ''
+    for _, v in ipairs(arg) do
+        res = res .. js_to_string(v)
+    end
+    return res
 end
 
 operations['substr'] = function(_, source, st, en)
@@ -410,14 +416,16 @@ operations['method'] = function(_, obj, method, ...)
     return nil
 end
 
-operations['join'] = function(_, separator, ...)
+operations['join'] = function(_, separator, items)
+    if not is_array(items) then
+        return nil
+    end
     if not js_to_boolean(separator) then
-        table.remove(arg)
-        return js_to_string(arg)
+        return js_to_string(items)
     end
 
     local res = ''
-    for i, v in ipairs(arg) do
+    for i, v in ipairs(items) do
         if i > 1 then
             res = res .. js_to_string(separator)
         end
