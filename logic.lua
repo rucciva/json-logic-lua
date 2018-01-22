@@ -445,12 +445,14 @@ local function get_operator(tab)
     return nil
 end
 
-local function table_copy_zeroed( source )
+local function table_copy_zeroed(source)
     local target = {}
     for i, _ in pairs(source) do
         target[i] = 0
     end
-    if is_array(source) then mark_as_array(target) end
+    if is_array(source) then
+        mark_as_array(target)
+    end
     return target
 end
 
@@ -563,9 +565,9 @@ recurser['and'] =
     end
 
     -- state initialization
-    current.state.length= current.state.length or #current.logic[op]
-    current.state.index= current.state.index or 1
-    current.state.recursed= current.state.recursed or {}
+    current.state.length = current.state.length or #current.logic[op]
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or {}
     current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
@@ -844,7 +846,6 @@ recurser['all'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
 
-
     -- zero length
     if #current.logic[op] == 0 then
         return table.remove(stack), nil
@@ -1089,7 +1090,7 @@ JsonLogic.apply =
         logic = logic,
         data = data,
         state = {
-            normalized = nil,
+            normalized = nil
         }
     }
     local last_child_result = nil
@@ -1131,7 +1132,6 @@ JsonLogic.apply =
 
             current.data = current.data or {}
             current.state.normalized = current.state.normalized or {}
-
             if type(recurser[op]) == 'function' then
                 current, last_child_result, err = recurser[op](stack, current, last_child_result)
             else
