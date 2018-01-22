@@ -170,7 +170,6 @@ local function js_to_string(a)
     return tostring(a)
 end
 
-
 local operations = {}
 
 operations['!!'] = function(_, a)
@@ -446,9 +445,55 @@ local function get_operator(tab)
     return nil
 end
 
-local recurse_operations = {}
+local function table_copy_zeroed( source )
+    local target = {}
+    for i, _ in pairs(source) do
+        target[i] = 0
+    end
+    if is_array(source) then mark_as_array(target) end
+    return target
+end
 
-recurse_operations['if'] =
+function recurse_array(stack, current, last_child_result)
+    -- zero length
+    if #current.logic == 0 then
+        return table.remove(stack), array()
+    end
+
+    -- state initialization
+    current.state.length = current.state.length or #current.logic
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or {}
+    current.logic_normalized = current.logic_normalized or table_copy_zeroed(current.logic)
+    --
+
+    -- recurse if necessary
+    if not current.state.recursed[current.state.index] then
+        current.state.recursed[current.state.index] = true
+        table.insert(stack, current)
+
+        current = {
+            logic = current.logic[current.state.index],
+            data = current.data,
+            state = {}
+        }
+        return current, last_child_result
+    end
+    current.logic_normalized[current.state.index] = last_child_result
+    --
+
+    -- process next item if available
+    if current.state.index < current.state.length then
+        current.state.index = current.state.index + 1
+        return current, last_child_result
+    end
+
+    return table.remove(stack), current.logic_normalized
+end
+
+local recurser = {}
+
+recurser['if'] =
     function(stack, current, last_child_result)
     -- 'if' should be called with a odd number of parameters, 3 or greater
     -- This works on the pattern:
@@ -463,22 +508,17 @@ recurse_operations['if'] =
     -- given 0 parameters, return NULL (not great practice, but there was no Else)
 
     local op = get_operator(current.logic)
+
     -- zero or one length
     if #current.logic[op] <= 1 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
 
     -- state initialization
-    if current.state.length == nil then
-        current.state.length = #current.logic[op]
-    end
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = {}
-    end
+    current.state.length = current.state.length or #current.logic[op]
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or {}
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse if haven't
@@ -511,28 +551,22 @@ recurse_operations['if'] =
     return current, last_child_result
 end
 
-recurse_operations['?:'] = recurse_operations['if']
+recurser['?:'] = recurser['if']
 
-recurse_operations['and'] =
+recurser['and'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
 
     -- zero length
     if #current.logic[op] == 0 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
 
     -- state initialization
-    if current.state.length == nil then
-        current.state.length = #current.logic[op]
-    end
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = {}
-    end
+    current.state.length= current.state.length or #current.logic[op]
+    current.state.index= current.state.index or 1
+    current.state.recursed= current.state.recursed or {}
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse if haven't
@@ -557,10 +591,11 @@ recurse_operations['and'] =
         last_child_result = current.logic_normalized[op][current.state.index]
         current = table.remove(stack)
     end
+
     return current, last_child_result
 end
 
-recurse_operations['or'] =
+recurser['or'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
 
@@ -571,15 +606,10 @@ recurse_operations['or'] =
     end
 
     -- state initialization
-    if current.state.length == nil then
-        current.state.length = #current.logic[op]
-    end
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = {}
-    end
+    current.state.length = current.state.length or #current.logic[op]
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or {}
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse if necessary
@@ -607,35 +637,26 @@ recurse_operations['or'] =
         last_child_result = current.logic_normalized[op][current.state.index]
         current = table.remove(stack)
     end
+
     return current, last_child_result
 end
 
-recurse_operations['filter'] =
+recurser['filter'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
 
     -- zero length
     if #current.logic[op] == 0 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
 
     -- state initialization
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = false
-    end
-    if current.state.assigned == nil then
-        current.state.assigned = false
-    end
-    if current.state.filtered == nil then
-        current.state.filtered = {}
-    end
-    if current.state.result == nil then
-        current.state.result = array()
-    end
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or false
+    current.state.scoped = current.state.scoped or false
+    current.state.filtered = current.state.filtered or {}
+    current.state.result = current.state.result or array()
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -649,19 +670,18 @@ recurse_operations['filter'] =
         }
         return current, last_child_result
     end
-    if not current.state.assigned and type(last_child_result) ~= 'table' then
-        current = table.remove(stack)
-        return current, nil
-    end
-    if not current.state.assigned then
-        current.state.assigned = true
+    if not current.state.scoped then
+        if type(last_child_result) ~= 'table' then
+            return table.remove(stack), nil
+        end
+        current.state.scoped = true
         current.logic_normalized[op][1] = last_child_result
         current.state.length = #current.logic_normalized[op][1]
     end
-    local scoped_data = current.logic_normalized[op][1]
     --
 
     -- filter and recurse if necessary
+    local scoped_data = current.logic_normalized[op][1]
     if not current.state.filtered[current.state.index] then
         current.state.filtered[current.state.index] = true
         table.insert(stack, current)
@@ -685,34 +705,22 @@ recurse_operations['filter'] =
     return current, last_child_result
 end
 
-recurse_operations['map'] =
+recurser['map'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
+
     -- zero length
     if #current.logic[op] == 0 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
 
     -- state initialization
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = false
-    end
-    if current.state.assigned == nil then
-        current.state.assigned = false
-    end
-    if current.state.mapped == nil then
-        current.state.mapped = {}
-    end
-    if current.state.result == nil then
-        current.state.result = array()
-        for i, _ in pairs(current.logic[op]) do
-            current.state.result[i] = 0
-        end
-    end
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or false
+    current.state.scoped = current.state.scoped or false
+    current.state.mapped = current.state.mapped or {}
+    current.state.result = current.state.result or table_copy_zeroed(current.logic[op])
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -726,23 +734,20 @@ recurse_operations['map'] =
         }
         return current, last_child_result
     end
-    if not current.state.assigned and type(last_child_result) ~= 'table' then
-        current = table.remove(stack)
-        return current, nil
-    end
-    if not current.state.assigned then
-        current.state.assigned = true
+    if not current.state.scoped then
+        if type(last_child_result) ~= 'table' then
+            return table.remove(stack), nil
+        end
+        current.state.scoped = true
         current.logic_normalized[op][1] = last_child_result
         current.state.length = #current.logic_normalized[op][1]
     end
-    local scoped_data = current.logic_normalized[op][1]
     --
-
+    
     -- map and recurse if necessary
+    local scoped_data = current.logic_normalized[op][1]
     if current.state.length < 1 then
-        last_child_result = array()
-        current = table.remove(stack)
-        return current, last_child_result
+        return table.remove(stack), array()
     end
     if not current.state.mapped[current.state.index] then
         current.state.mapped[current.state.index] = true
@@ -766,7 +771,7 @@ recurse_operations['map'] =
     return current, last_child_result
 end
 
-recurse_operations['reduce'] =
+recurser['reduce'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
     -- zero length
@@ -774,23 +779,14 @@ recurse_operations['reduce'] =
         current = table.remove(stack)
         return current, nil
     end
-
+    
     -- state initialization
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = false
-    end
-    if current.state.assigned == nil then
-        current.state.assigned = false
-    end
-    if current.state.reduced == nil then
-        current.state.reduced = {}
-    end
-    if current.state.result == nil then
-        current.state.result = current.logic[op][3]
-    end
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or false
+    current.state.scoped = current.state.scoped or false
+    current.state.reduced = current.state.reduced or {}
+    current.state.result = current.state.result or current.logic[op][3]
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -804,24 +800,20 @@ recurse_operations['reduce'] =
         }
         return current, last_child_result
     end
-    if not current.state.assigned and type(last_child_result) ~= 'table' then
-        last_child_result = current.state.result
-        current = table.remove(stack)
-        return current, last_child_result
-    end
-    if not current.state.assigned then
-        current.state.assigned = true
+    if not current.state.scoped then
+        if type(last_child_result) ~= 'table' then
+            return table.remove(stack), current.state.result
+        end
+        current.state.scoped = true
         current.logic_normalized[op][1] = last_child_result
         current.state.length = #current.logic_normalized[op][1]
     end
-    local scoped_data = current.logic_normalized[op][1]
     --
 
-    -- filter and recurse if necessary
+    -- reduce and recurse if necessary
+    local scoped_data = current.logic_normalized[op][1]
     if current.state.length < 1 then
-        last_child_result = current.state.result
-        current = table.remove(stack)
-        return current, last_child_result
+        return table.remove(stack), current.state.result
     end
     if not current.state.reduced[current.state.index] then
         current.state.reduced[current.state.index] = true
@@ -848,29 +840,22 @@ recurse_operations['reduce'] =
     return current, last_child_result
 end
 
-recurse_operations['all'] =
+recurser['all'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
+    
 
     -- zero length
     if #current.logic[op] == 0 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
 
     -- state initialization
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = false
-    end
-    if current.state.assigned == nil then
-        current.state.assigned = false
-    end
-    if current.state.checked == nil then
-        current.state.checked = {}
-    end
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or false
+    current.state.scoped = current.state.scoped or false
+    current.state.checked = current.state.checked or {}
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -884,19 +869,18 @@ recurse_operations['all'] =
         }
         return current, last_child_result
     end
-    if not current.state.assigned and type(last_child_result) ~= 'table' then
-        current = table.remove(stack)
-        return current, nil
-    end
-    if not current.state.assigned then
-        current.state.assigned = true
+    if not current.state.scoped then
+        if type(last_child_result) ~= 'table' then
+            return table.remove(stack), nil
+        end
+        current.state.scoped = true
         current.logic_normalized[op][1] = last_child_result
         current.state.length = #current.logic_normalized[op][1]
     end
-    local scoped_data = current.logic_normalized[op][1]
     --
-
+    
     -- filter and recurse if necessary
+    local scoped_data = current.logic_normalized[op][1]
     if current.state.length < 1 then
         current = table.remove(stack)
         return current, nil
@@ -922,29 +906,21 @@ recurse_operations['all'] =
     return current, last_child_result
 end
 
-recurse_operations['some'] =
+recurser['some'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
 
     -- zero length
     if #current.logic[op] == 0 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
 
     -- state initialization
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = false
-    end
-    if current.state.assigned == nil then
-        current.state.assigned = false
-    end
-    if current.state.checked == nil then
-        current.state.checked = {}
-    end
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or false
+    current.state.scoped = current.state.scoped or false
+    current.state.checked = current.state.checked or {}
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -958,22 +934,20 @@ recurse_operations['some'] =
         }
         return current, last_child_result
     end
-    if not current.state.assigned and type(last_child_result) ~= 'table' then
-        current = table.remove(stack)
-        return current, nil
-    end
-    if not current.state.assigned then
-        current.state.assigned = true
+    if not current.state.scoped then
+        if type(last_child_result) ~= 'table' then
+            return table.remove(stack), nil
+        end
+        current.state.scoped = true
         current.logic_normalized[op][1] = last_child_result
         current.state.length = #current.logic_normalized[op][1]
     end
-    local scoped_data = current.logic_normalized[op][1]
     --
 
     -- filter and recurse if necessary
+    local scoped_data = current.logic_normalized[op][1]
     if current.state.length < 1 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
     if not current.state.checked[current.state.index] then
         current.state.checked[current.state.index] = true
@@ -996,7 +970,7 @@ recurse_operations['some'] =
     return current, last_child_result
 end
 
-recurse_operations['none'] =
+recurser['none'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
     -- zero length
@@ -1006,18 +980,12 @@ recurse_operations['none'] =
     end
 
     -- state initialization
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
-        current.state.recursed = false
-    end
-    if current.state.assigned == nil then
-        current.state.assigned = false
-    end
-    if current.state.checked == nil then
-        current.state.checked = {}
-    end
+    current.state.index = current.state.index or 1
+    current.state.recursed = current.state.recursed or false
+    current.state.scoped = current.state.scoped or false
+    current.state.checked = current.state.checked or {}
+    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    
     --
 
     -- recurse scoped_data if necessary
@@ -1031,22 +999,20 @@ recurse_operations['none'] =
         }
         return current, last_child_result
     end
-    if not current.state.assigned and type(last_child_result) ~= 'table' then
-        current = table.remove(stack)
-        return current, nil
-    end
-    if not current.state.assigned then
-        current.state.assigned = true
+    if not current.state.scoped then
+        if type(last_child_result) ~= 'table' then
+            return table.remove(stack), nil
+        end
+        current.state.scoped = true
         current.logic_normalized[op][1] = last_child_result
         current.state.length = #current.logic_normalized[op][1]
     end
-    local scoped_data = current.logic_normalized[op][1]
     --
 
     -- filter and recurse if necessary
+    local scoped_data = current.logic_normalized[op][1]
     if current.state.length < 1 then
-        current = table.remove(stack)
-        return current, nil
+        return table.remove(stack), nil
     end
     if not current.state.checked[current.state.index] then
         current.state.checked[current.state.index] = true
@@ -1069,64 +1035,56 @@ recurse_operations['none'] =
     return current, last_child_result
 end
 
-function recurse_array(stack, current, last_child_result)
-    if not current.logic_normalized then
-        current.logic_normalized = array()
-        for i, _ in pairs(current.logic) do
-            current.logic_normalized[i] = 0
-        end
-    end
-    -- zero length
-    if #current.logic == 0 then
-        current = table.remove(stack)
-        return current, array()
-    end
+local function is_sub_operation(op)
+    return type(op) == 'string' and string.find(op, '.', 1, true) and not string_starts(op, '.') and
+        not string_ends(op, '.')
+end
 
-    -- state initialization
-    if current.state.length == nil then
-        current.state.length = #current.logic
-    end
-    if current.state.index == nil then
-        current.state.index = 1
-    end
-    if current.state.recursed == nil then
+function recurse_others(stack, current, last_child_result)
+    local err = nil
+    local op = get_operator(current.logic)
+
+    -- recurse if haven't
+    if not current.state.recursed then
         current.state.recursed = {}
-    end
-    --
-
-    -- recurse if necessary
-    if not current.state.recursed[current.state.index] then
-        -- the item has not been tried for primitivity
-
-        -- push the current array into stack and mark the current index
-        current.state.recursed[current.state.index] = true
         table.insert(stack, current)
-
-        -- set the item as current
         current = {
-            logic = current.logic[current.state.index],
+            logic = current.logic[op],
             data = current.data,
             state = {}
         }
         return current, last_child_result
     end
-    current.logic_normalized[current.state.index] = last_child_result
     --
 
-    -- process next item if available
-    if current.state.index < current.state.length then
-        current.state.index = current.state.index + 1
-        return current, last_child_result
+    if not is_array(last_child_result) then
+        last_child_result = mark_as_array({last_child_result})
     end
+    current.logic_normalized[op] = last_child_result
 
-    last_child_result = current.logic_normalized
-    current = table.remove(stack)
-    return current, last_child_result
+    -- apply final operation
+    if type(operations[op]) == 'function' then
+        last_child_result = operations[op](current.data, unpack(current.logic_normalized[op]))
+    elseif is_sub_operation(op) then
+        local newOP = operations
+        for subOP in op:gmatch('([^\\.]+)') do
+            newOP = newOP[subOP]
+            if newOP == nil or type(newOP) ~= 'function' then
+                return current.logic, 'invalid operations'
+            end
+        end
+        last_child_result = newOP(current.data, unpack(current.logic_normalized[op]))
+    else
+        last_child_result = current.logic
+        err = 'invalid operations'
+    end
+    return table.remove(stack), last_child_result, err
 end
 
 local JsonLogic = {}
 
-JsonLogic.apply = function(logic, data, options)
+JsonLogic.apply =
+    function(logic, data, options)
     local stack = {}
     local current = {
         logic = logic,
@@ -1143,10 +1101,12 @@ JsonLogic.apply = function(logic, data, options)
     -- since lua does not have "continue" like statement, we use two loops
     while current do
         while current do
+            -- external-marked array
             if type(options.is_array) == 'function' and options.is_array(current.logic) then
                 mark_as_array(current.logic)
             end
-            -- recurse array or primitive
+
+            -- recurse array
             if is_array(current.logic) then
                 current, last_child_result = recurse_array(stack, current, last_child_result)
                 break
@@ -1160,13 +1120,8 @@ JsonLogic.apply = function(logic, data, options)
             end
             --
 
-            current.data = current.data or {}
-            local op = get_operator(current.logic)
-            if current.logic_normalized == nil then
-                current.logic_normalized = {}
-                current.logic_normalized[op] = {}
-            end
             -- check for blacklist or non-whitelisted operations
+            local op = get_operator(current.logic)
             if type(options.blacklist) == 'table' and options.blacklist[op] then
                 return current.logic, 'blacklisted operations'
             elseif type(options.whitelist) == 'table' and not options.whitelist[op] then
@@ -1174,54 +1129,14 @@ JsonLogic.apply = function(logic, data, options)
             end
             --
 
-            -- 'if', 'and', and 'or' violate the normal rule of depth-first calculating consequents,
-            -- let each manage recursion as needed.
-            if type(recurse_operations[op]) == 'function' then
-                current, last_child_result = recurse_operations[op](stack, current, last_child_result)
-                break
-            end
+            current.data = current.data or {}
+            current.logic_normalized = current.logic_normalized or {}
 
-            -- Everyone else gets immediate depth-first recursion of it's value before invoked
-            if not current.state.recursed then
-                current.state.recursed = {}
-                table.insert(stack, current)
-                current = {
-                    logic = current.logic[op],
-                    data = current.data,
-                    state = {}
-                }
-                break
-            end
-            if type(options.is_array) == 'function' and options.is_array(last_child_result) then
-                mark_as_array(last_child_result)
-            end
-            current.logic_normalized[op] = last_child_result
-            if not is_array(current.logic_normalized[op]) then
-                current.logic_normalized[op] = mark_as_array({current.logic_normalized[op]})
-            end
-            --
-
-            -- invoke the operator
-            if type(operations[op]) == 'function' then
-                last_child_result = operations[op](current.data, unpack(current.logic_normalized[op]))
-            elseif
-                type(op) == 'string' and string.find(op, '.', 1, true) and not string_starts(op, '.') and
-                    not string_ends(op, '.')
-             then
-                local newOP = operations
-                for subOP in op:gmatch('([^\\.]+)') do
-                    newOP = newOP[subOP]
-                    if newOP == nil or type(newOP) ~= 'function' then
-                        return current.logic, 'invalid operations'
-                    end
-                end
-                last_child_result = newOP(current.data, unpack(current.logic_normalized[op]))
+            if type(recurser[op]) == 'function' then
+                current, last_child_result, err = recurser[op](stack, current, last_child_result)
             else
-                last_child_result = current.logic
-                err = 'invalid operations'
+                current, last_child_result, err = recurse_others(stack, current, last_child_result)
             end
-            current = table.remove(stack)
-            --
         end
     end
 
