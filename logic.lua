@@ -464,7 +464,7 @@ function recurse_array(stack, current, last_child_result)
     current.state.length = current.state.length or #current.logic
     current.state.index = current.state.index or 1
     current.state.recursed = current.state.recursed or {}
-    current.logic_normalized = current.logic_normalized or table_copy_zeroed(current.logic)
+    current.state.normalized = current.state.normalized or table_copy_zeroed(current.logic)
     --
 
     -- recurse if necessary
@@ -479,7 +479,7 @@ function recurse_array(stack, current, last_child_result)
         }
         return current, last_child_result
     end
-    current.logic_normalized[current.state.index] = last_child_result
+    current.state.normalized[current.state.index] = last_child_result
     --
 
     -- process next item if available
@@ -488,7 +488,7 @@ function recurse_array(stack, current, last_child_result)
         return current, last_child_result
     end
 
-    return table.remove(stack), current.logic_normalized
+    return table.remove(stack), current.state.normalized
 end
 
 local recurser = {}
@@ -518,7 +518,7 @@ recurser['if'] =
     current.state.length = current.state.length or #current.logic[op]
     current.state.index = current.state.index or 1
     current.state.recursed = current.state.recursed or {}
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse if haven't
@@ -532,11 +532,11 @@ recurser['if'] =
         }
         return current, last_child_result
     end
-    current.logic_normalized[op][current.state.index] = last_child_result
+    current.state.normalized[op][current.state.index] = last_child_result
     --
 
     if current.state.index % 2 == 1 and current.state.index < current.state.length then
-        if js_to_boolean(current.logic_normalized[op][current.state.index]) then
+        if js_to_boolean(current.state.normalized[op][current.state.index]) then
             -- current conditions is true
             current.state.index = current.state.index + 1
         else
@@ -544,7 +544,7 @@ recurser['if'] =
             current.state.index = current.state.index + 2
         end
     else
-        last_child_result = current.logic_normalized[op][current.state.index]
+        last_child_result = current.state.normalized[op][current.state.index]
         current = table.remove(stack)
     end
 
@@ -566,7 +566,7 @@ recurser['and'] =
     current.state.length= current.state.length or #current.logic[op]
     current.state.index= current.state.index or 1
     current.state.recursed= current.state.recursed or {}
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse if haven't
@@ -580,15 +580,15 @@ recurser['and'] =
         }
         return current, last_child_result
     end
-    current.logic_normalized[op][current.state.index] = last_child_result
+    current.state.normalized[op][current.state.index] = last_child_result
     --
 
-    if js_to_boolean(current.logic_normalized[op][current.state.index]) and current.state.index < current.state.length then
+    if js_to_boolean(current.state.normalized[op][current.state.index]) and current.state.index < current.state.length then
         -- current condition is true
         current.state.index = current.state.index + 1
     else
         -- current condition is false or the last element
-        last_child_result = current.logic_normalized[op][current.state.index]
+        last_child_result = current.state.normalized[op][current.state.index]
         current = table.remove(stack)
     end
 
@@ -609,7 +609,7 @@ recurser['or'] =
     current.state.length = current.state.length or #current.logic[op]
     current.state.index = current.state.index or 1
     current.state.recursed = current.state.recursed or {}
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse if necessary
@@ -623,18 +623,18 @@ recurser['or'] =
         }
         return current, last_child_result
     end
-    current.logic_normalized[op][current.state.index] = last_child_result
+    current.state.normalized[op][current.state.index] = last_child_result
     --
 
     if
-        not js_to_boolean(current.logic_normalized[op][current.state.index]) and
+        not js_to_boolean(current.state.normalized[op][current.state.index]) and
             current.state.index < current.state.length
      then
         -- if true then continue next
         current.state.index = current.state.index + 1
     else
         -- false or the last element
-        last_child_result = current.logic_normalized[op][current.state.index]
+        last_child_result = current.state.normalized[op][current.state.index]
         current = table.remove(stack)
     end
 
@@ -656,7 +656,7 @@ recurser['filter'] =
     current.state.scoped = current.state.scoped or false
     current.state.filtered = current.state.filtered or {}
     current.state.result = current.state.result or array()
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -675,13 +675,13 @@ recurser['filter'] =
             return table.remove(stack), nil
         end
         current.state.scoped = true
-        current.logic_normalized[op][1] = last_child_result
-        current.state.length = #current.logic_normalized[op][1]
+        current.state.normalized[op][1] = last_child_result
+        current.state.length = #current.state.normalized[op][1]
     end
     --
 
     -- filter and recurse if necessary
-    local scoped_data = current.logic_normalized[op][1]
+    local scoped_data = current.state.normalized[op][1]
     if not current.state.filtered[current.state.index] then
         current.state.filtered[current.state.index] = true
         table.insert(stack, current)
@@ -720,7 +720,7 @@ recurser['map'] =
     current.state.scoped = current.state.scoped or false
     current.state.mapped = current.state.mapped or {}
     current.state.result = current.state.result or table_copy_zeroed(current.logic[op])
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -739,13 +739,13 @@ recurser['map'] =
             return table.remove(stack), nil
         end
         current.state.scoped = true
-        current.logic_normalized[op][1] = last_child_result
-        current.state.length = #current.logic_normalized[op][1]
+        current.state.normalized[op][1] = last_child_result
+        current.state.length = #current.state.normalized[op][1]
     end
     --
-    
+
     -- map and recurse if necessary
-    local scoped_data = current.logic_normalized[op][1]
+    local scoped_data = current.state.normalized[op][1]
     if current.state.length < 1 then
         return table.remove(stack), array()
     end
@@ -779,14 +779,14 @@ recurser['reduce'] =
         current = table.remove(stack)
         return current, nil
     end
-    
+
     -- state initialization
     current.state.index = current.state.index or 1
     current.state.recursed = current.state.recursed or false
     current.state.scoped = current.state.scoped or false
     current.state.reduced = current.state.reduced or {}
     current.state.result = current.state.result or current.logic[op][3]
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -805,13 +805,13 @@ recurser['reduce'] =
             return table.remove(stack), current.state.result
         end
         current.state.scoped = true
-        current.logic_normalized[op][1] = last_child_result
-        current.state.length = #current.logic_normalized[op][1]
+        current.state.normalized[op][1] = last_child_result
+        current.state.length = #current.state.normalized[op][1]
     end
     --
 
     -- reduce and recurse if necessary
-    local scoped_data = current.logic_normalized[op][1]
+    local scoped_data = current.state.normalized[op][1]
     if current.state.length < 1 then
         return table.remove(stack), current.state.result
     end
@@ -843,7 +843,7 @@ end
 recurser['all'] =
     function(stack, current, last_child_result)
     local op = get_operator(current.logic)
-    
+
 
     -- zero length
     if #current.logic[op] == 0 then
@@ -855,7 +855,7 @@ recurser['all'] =
     current.state.recursed = current.state.recursed or false
     current.state.scoped = current.state.scoped or false
     current.state.checked = current.state.checked or {}
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -874,13 +874,13 @@ recurser['all'] =
             return table.remove(stack), nil
         end
         current.state.scoped = true
-        current.logic_normalized[op][1] = last_child_result
-        current.state.length = #current.logic_normalized[op][1]
+        current.state.normalized[op][1] = last_child_result
+        current.state.length = #current.state.normalized[op][1]
     end
     --
-    
+
     -- filter and recurse if necessary
-    local scoped_data = current.logic_normalized[op][1]
+    local scoped_data = current.state.normalized[op][1]
     if current.state.length < 1 then
         current = table.remove(stack)
         return current, nil
@@ -920,7 +920,7 @@ recurser['some'] =
     current.state.recursed = current.state.recursed or false
     current.state.scoped = current.state.scoped or false
     current.state.checked = current.state.checked or {}
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -939,13 +939,13 @@ recurser['some'] =
             return table.remove(stack), nil
         end
         current.state.scoped = true
-        current.logic_normalized[op][1] = last_child_result
-        current.state.length = #current.logic_normalized[op][1]
+        current.state.normalized[op][1] = last_child_result
+        current.state.length = #current.state.normalized[op][1]
     end
     --
 
     -- filter and recurse if necessary
-    local scoped_data = current.logic_normalized[op][1]
+    local scoped_data = current.state.normalized[op][1]
     if current.state.length < 1 then
         return table.remove(stack), nil
     end
@@ -984,8 +984,7 @@ recurser['none'] =
     current.state.recursed = current.state.recursed or false
     current.state.scoped = current.state.scoped or false
     current.state.checked = current.state.checked or {}
-    current.logic_normalized[op] = current.logic_normalized[op] or array()
-    
+    current.state.normalized[op] = current.state.normalized[op] or array()
     --
 
     -- recurse scoped_data if necessary
@@ -1004,13 +1003,13 @@ recurser['none'] =
             return table.remove(stack), nil
         end
         current.state.scoped = true
-        current.logic_normalized[op][1] = last_child_result
-        current.state.length = #current.logic_normalized[op][1]
+        current.state.normalized[op][1] = last_child_result
+        current.state.length = #current.state.normalized[op][1]
     end
     --
 
     -- filter and recurse if necessary
-    local scoped_data = current.logic_normalized[op][1]
+    local scoped_data = current.state.normalized[op][1]
     if current.state.length < 1 then
         return table.remove(stack), nil
     end
@@ -1060,20 +1059,20 @@ function recurse_others(stack, current, last_child_result)
     if not is_array(last_child_result) then
         last_child_result = mark_as_array({last_child_result})
     end
-    current.logic_normalized[op] = last_child_result
+    current.state.normalized[op] = last_child_result
 
     -- apply final operation
     if type(operations[op]) == 'function' then
-        last_child_result = operations[op](current.data, unpack(current.logic_normalized[op]))
+        last_child_result = operations[op](current.data, unpack(current.state.normalized[op]))
     elseif is_sub_operation(op) then
         local newOP = operations
         for subOP in op:gmatch('([^\\.]+)') do
             newOP = newOP[subOP]
             if newOP == nil or type(newOP) ~= 'function' then
-                return current.logic, 'invalid operations'
+                return table.remove(stack), current.logic, 'invalid operations'
             end
         end
-        last_child_result = newOP(current.data, unpack(current.logic_normalized[op]))
+        last_child_result = newOP(current.data, unpack(current.state.normalized[op]))
     else
         last_child_result = current.logic
         err = 'invalid operations'
@@ -1088,9 +1087,10 @@ JsonLogic.apply =
     local stack = {}
     local current = {
         logic = logic,
-        logic_normalized = nil,
         data = data,
-        state = {}
+        state = {
+            normalized = nil,
+        }
     }
     local last_child_result = nil
     local err = nil
@@ -1130,7 +1130,7 @@ JsonLogic.apply =
             --
 
             current.data = current.data or {}
-            current.logic_normalized = current.logic_normalized or {}
+            current.state.normalized = current.state.normalized or {}
 
             if type(recurser[op]) == 'function' then
                 current, last_child_result, err = recurser[op](stack, current, last_child_result)
