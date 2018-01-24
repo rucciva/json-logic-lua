@@ -1050,9 +1050,35 @@ local function is_sub_operation(op)
         not string_ends(op, '.')
 end
 
-function recurse_others(stack, current, last_child_result)
+local function get_operation(op_string)
+    if type(operations[op_string]) == 'function' then
+        return operations[op_string]
+    elseif not is_sub_operation(op_string) then
+        return nil
+    end
+
+    -- op string contain "."
+    -- WARN: untested
+    local new_op = operations
+    for sub_op_string in op_string:gmatch('([^\\.]+)') do
+        new_op = new_op[sub_op_string]
+        if new_op == nil then
+            return nil
+        end
+    end
+    if type(new_op) ~= 'function' then
+        return nil
+    end
+    return new_op
+    --
+end
+local function recurse_others(stack, current, last_child_result)
     local err = nil
     local op = get_operator(current.logic)
+    local operation = get_operation(op)
+    if operation == nil then
+        return table.remove(stack), current.logic, 'invalid operations'
+    end
 
     -- recurse if haven't
     if not current.state.recursed then
@@ -1072,22 +1098,7 @@ function recurse_others(stack, current, last_child_result)
     end
     current.state.normalized[op] = last_child_result
 
-    -- apply final operation
-    if type(operations[op]) == 'function' then
-        last_child_result = operations[op](current.data, unpack(current.state.normalized[op]))
-    elseif is_sub_operation(op) then
-        local newOP = operations
-        for subOP in op:gmatch('([^\\.]+)') do
-            newOP = newOP[subOP]
-            if newOP == nil or type(newOP) ~= 'function' then
-                return table.remove(stack), current.logic, 'invalid operations'
-            end
-        end
-        last_child_result = newOP(current.data, unpack(current.state.normalized[op]))
-    else
-        last_child_result = current.logic
-        err = 'invalid operations'
-    end
+    last_child_result = operation(current.data, unpack(current.state.normalized[op]))
     return table.remove(stack), last_child_result, err
 end
 
