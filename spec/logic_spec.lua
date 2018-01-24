@@ -2139,3 +2139,71 @@ describe("json-logic equality test", function ()
         end)
     end)
 end)
+
+describe("json-logic operation test", function ()
+    describe("given unregistered operation", function ()
+        local test_table = {
+            {logic = {echo = array(1,2,3)}},
+            {logic = {first = array(1,2,3)}},
+        }
+        it("should return the original logic", function ()   
+            for i, t in ipairs(test_table) do
+                local res = logic_apply(t.logic, nil)
+                assert.message('failed at index: ' .. i).are.equal(t.logic, res)
+            end
+        end)
+    end)
+
+    describe("given new operation to be registered", function ()
+        local test_table = {
+            {
+                new_op_name = "echo", 
+                new_op = function(_, ...) 
+                    arg["n"] = nil
+                    return arg 
+                end,
+                logic = {echo = array(array(1,2,3,4,5))},
+                expected = array(array(1,2,3,4,5)),
+             },
+             {
+                new_op_name = "first", 
+                new_op = function(_, ...)
+                    -- return first parameter 
+                    return unpack(arg)
+                end,
+                logic = {first = array(1,2,3,4,5)},
+                expected = 1,
+             },
+        }
+        it("should call the new operation correctly", function ()
+            for i, t in ipairs(test_table) do
+                local called = 0
+                local operation = function(data, ...) 
+                    local res =  t.new_op(data, unpack(arg))
+                    called = called + 1
+                    return res
+                end
+                logic.add_operation(t.new_op_name, operation)
+                local res = logic_apply(t.logic, nil)
+                assert.message("the new operation was not called once").are.equal(1, called)
+                assert.message('failed at index: ' .. i).are.same(t.expected, res)
+                logic.delete_operation(t.new_op_name)
+            end
+        end)
+        it("should not call the operation after it is removed", function ()
+            for i, t in ipairs(test_table) do
+                local called = 0
+                local operation = function(data, ...) 
+                    local res =  t.new_op(data, unpack(arg))
+                    called = called + 1
+                    return res
+                end
+                logic.add_operation(t.new_op_name, operation)
+                logic.delete_operation(t.new_op_name)
+                local res = logic_apply(t.logic, nil)
+                assert.message("the new operation was not called once").are.equal(0, called)
+                assert.message('failed at index: ' .. i).are.equal(t.logic, res)
+            end
+        end)
+    end)
+end)
