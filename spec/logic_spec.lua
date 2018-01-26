@@ -2171,8 +2171,8 @@ describe("json-logic operation test", function ()
                     -- return first parameter
                     return arg[1]
                 end,
-                logic = {first = array(1,2,3,4,5)},
-                expected = 1,
+                logic = {first = array(5,4,3,2,1)},
+                expected = 5,
              },
         }
         it("should call the new operation correctly", function ()

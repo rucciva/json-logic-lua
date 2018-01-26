@@ -1076,14 +1076,14 @@ end
 
 local function recurse_others(stack, current, last_child_result, options)
     local err = nil
-    local op = get_operator(current.logic)
+    local operation_name = get_operator(current.logic)
     local available_operations
     if options ~= nil and type(options.custom_operations) == 'table' then
         available_operations = setmetatable(options.custom_operations, operations)
     else
         available_operations = operations
     end
-    local operation = get_operation(op, available_operations)
+    local operation = get_operation(operation_name, available_operations)
     if operation == nil then
         return table.remove(stack), current.logic, 'invalid operations'
     end
@@ -1093,7 +1093,7 @@ local function recurse_others(stack, current, last_child_result, options)
         current.state.recursed = {}
         table.insert(stack, current)
         current = {
-            logic = current.logic[op],
+            logic = current.logic[operation_name],
             data = current.data,
             state = {}
         }
@@ -1104,14 +1104,13 @@ local function recurse_others(stack, current, last_child_result, options)
     if not is_array(last_child_result) then
         last_child_result = mark_as_array({last_child_result})
     end
-    current.state.normalized[op] = last_child_result
+    current.state.normalized[operation_name] = last_child_result
 
-    last_child_result = operation(current.data, unpack(current.state.normalized[op]))
+    last_child_result = operation(current.data, unpack(current.state.normalized[operation_name]))
     return table.remove(stack), last_child_result, err
 end
 
 local JsonLogic = {}
-
 --- function sum description.
 -- apply the json-logic with the given data
 -- some behavior of json-logic can be influenced by 'options' table
