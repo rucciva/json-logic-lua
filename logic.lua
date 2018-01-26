@@ -13,7 +13,7 @@ local function mark_as_array(tab)
 end
 
 local function array(...)
-    return mark_as_array({unpack(arg)})
+    return mark_as_array({...})
 end
 
 local function is_array(tab)
@@ -175,6 +175,7 @@ local function js_to_string(a)
 end
 
 local operations = {}
+operations.__index = operations
 
 operations['!!'] = function(_, a)
     return js_to_boolean(a)
@@ -1050,16 +1051,16 @@ local function is_sub_operation(op)
         not string_ends(op, '.')
 end
 
-local function get_operation(op_string)
-    if type(operations[op_string]) == 'function' then
-        return operations[op_string]
+local function get_operation(op_string, available_operations)
+    if type(available_operations[op_string]) == 'function' then
+        return available_operations[op_string]
     elseif not is_sub_operation(op_string) then
         return nil
     end
 
     -- op string contain "."
     -- WARN: untested
-    local new_op = operations
+    local new_op = available_operations
     for sub_op_string in op_string:gmatch('([^\\.]+)') do
         new_op = new_op[sub_op_string]
         if new_op == nil then
@@ -1072,10 +1073,17 @@ local function get_operation(op_string)
     return new_op
     --
 end
-local function recurse_others(stack, current, last_child_result)
+
+local function recurse_others(stack, current, last_child_result, options)
     local err = nil
-    local op = get_operator(current.logic)
-    local operation = get_operation(op)
+    local operation_name = get_operator(current.logic)
+    local available_operations
+    if options ~= nil and type(options.custom_operations) == 'table' then
+        available_operations = setmetatable(options.custom_operations, operations)
+    else
+        available_operations = operations
+    end
+    local operation = get_operation(operation_name, available_operations)
     if operation == nil then
         return table.remove(stack), current.logic, 'invalid operations'
     end
@@ -1085,7 +1093,7 @@ local function recurse_others(stack, current, last_child_result)
         current.state.recursed = {}
         table.insert(stack, current)
         current = {
-            logic = current.logic[op],
+            logic = current.logic[operation_name],
             data = current.data,
             state = {}
         }
@@ -1096,16 +1104,27 @@ local function recurse_others(stack, current, last_child_result)
     if not is_array(last_child_result) then
         last_child_result = mark_as_array({last_child_result})
     end
-    current.state.normalized[op] = last_child_result
+    current.state.normalized[operation_name] = last_child_result
 
-    last_child_result = operation(current.data, unpack(current.state.normalized[op]))
+    last_child_result = operation(current.data, unpack(current.state.normalized[operation_name]))
     return table.remove(stack), last_child_result, err
 end
 
 local JsonLogic = {}
-
-JsonLogic.apply =
-    function(logic, data, options)
+--- function sum description.
+-- apply the json-logic with the given data
+-- some behavior of json-logic can be influenced by 'options' table
+-- 'options' can include the following attribute:
+--   custom_operations = (table), a table contains custom operations
+--   blacklist = (table), an array contains list of operations to be blacklisted.
+--   whitelist = (table), an array contains list of operations to be whitelisted.
+--   is_array = (function), a function that determine wether a table is an array or not
+-- @tparam table logic description
+-- @tparam table data description
+-- @tparam table options is a table containing keys:
+-- @return value result of the logic.
+-- @author
+function JsonLogic.apply(logic, data, options)
     local stack = {}
     local current = {
         logic = logic,
@@ -1154,9 +1173,9 @@ JsonLogic.apply =
             current.data = current.data or {}
             current.state.normalized = current.state.normalized or {}
             if type(recurser[op]) == 'function' then
-                current, last_child_result, err = recurser[op](stack, current, last_child_result)
+                current, last_child_result, err = recurser[op](stack, current, last_child_result, options)
             else
-                current, last_child_result, err = recurse_others(stack, current, last_child_result)
+                current, last_child_result, err = recurse_others(stack, current, last_child_result, options)
             end
         end
     end
@@ -1164,20 +1183,12 @@ JsonLogic.apply =
     return last_child_result, err
 end
 
-JsonLogic.new_logic = function(operation, ...)
+function JsonLogic.new_logic(operation, ...)
     local lgc = {}
     if operation ~= nil then
-        lgc[operation] = array(unpack(arg))
+        lgc[operation] = array(...)
     end
     return lgc
-end
-
-JsonLogic.add_operation = function(name, code)
-    operations[name] = code
-end
-
-JsonLogic.delete_operation = function(name)
-    operations[name] = nil
 end
 
 JsonLogic.array = array
