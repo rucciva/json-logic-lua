@@ -1143,7 +1143,7 @@ function JsonLogic.apply(logic, data, options)
     while current do
         while current do
             -- external-marked array
-            if type(options.is_array) == 'function' and options.is_array(current.logic) then
+            if not is_array(current.logic) and type(options.is_array) == 'function' and options.is_array(current.logic) then
                 mark_as_array(current.logic)
             end
 
