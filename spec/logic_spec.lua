@@ -1,9 +1,13 @@
 local array_mt = {}
-local function array(...)
-    return setmetatable({...}, array_mt)
-end
+
 local function is_array(tab)
     return getmetatable(tab) == array_mt
+end
+local function mark_as_array(tab)
+    return setmetatable(tab, array_mt)
+end
+local function array(...)
+    return mark_as_array({...})
 end
 
 local logic = require('logic')
@@ -12,6 +16,7 @@ local function logic_apply(lgc, data, options)
         options = {}
     end
     options.is_array = is_array
+    options.mark_as_array = mark_as_array
     return logic.apply(lgc, data, options)
 end
 
@@ -139,7 +144,7 @@ describe(
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
                 local res = logic_apply({missing = t.params}, t.data)
-                assert.message('failed at index: ' .. i).is_true(logic.is_array(res))
+                assert.message('failed at index: ' .. i).is_true(is_array(res))
                 assert.message('failed at index: ' .. i).are.same(t.expected, res)
             end
         end
@@ -200,7 +205,7 @@ describe(
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
                 local res = logic_apply({missing_some = t.params}, t.data)
-                assert.message('failed at index: ' .. i).is_true(logic.is_array(res))
+                assert.message('failed at index: ' .. i).is_true(is_array(res))
                 assert.message('failed at index: ' .. i).are.same(t.expected, res)
             end
         end
@@ -268,7 +273,7 @@ describe(
 
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
-                local res = logic_apply(logic.new_logic('if', unpack(t.params)), t.data)
+                local res = logic_apply(logic.new_logic('if', t.params), t.data)
                 assert.message('failed at index: ' .. i).are.equal(t.expected, res)
             end
         end
@@ -425,7 +430,7 @@ describe(
         local truthee = {}
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
-                local res = logic_apply(logic.new_logic('and', unpack(t.params)), t.data)
+                local res = logic_apply(logic.new_logic('and', t.params), t.data)
                 assert.message('failed at index: ' .. i).are.equal(t.expected, res)
             end
         end
@@ -466,7 +471,7 @@ describe(
         local truthee = {}
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
-                local res = logic_apply(logic.new_logic('or', unpack(t.params)), t.data)
+                local res = logic_apply(logic.new_logic('or', t.params), t.data)
                 assert.message('failed at index: ' .. i).are.equal(t.expected, res)
             end
         end
@@ -516,11 +521,11 @@ describe(
                     function()
                         local test_table = {
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('%', {var = ''}, 2)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('%', array( {var = ''}, 2))),
                                 expected = {1, 3, 5}
                             },
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('-', {var = ''}, 2)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('-', array( {var = ''}, 2))),
                                 expected = {1, 3, 4, 5}
                             },
                             {
@@ -528,7 +533,7 @@ describe(
                                 expected = {1, 2, 3, 4, 5}
                             },
                             {
-                                params = array(array(), logic.new_logic('-', {var = ''}, 2)),
+                                params = array(array(), logic.new_logic('-', array( {var = ''}, 2))),
                                 expected = {}
                             },
                             {
@@ -571,19 +576,19 @@ describe(
                     function()
                         local test_table = {
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('*', {var = ''}, 2)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('*', array( {var = ''}, 2))),
                                 expected = array(2, 4, 6, 8, 10)
                             },
                             {
-                                params = array({1, 2, 3, 4, 5}, logic.new_logic('*', {var = ''}, 2)),
+                                params = array({1, 2, 3, 4, 5}, logic.new_logic('*', array( {var = ''}, 2))),
                                 expected = array(2, 4, 6, 8, 10)
                             },
                             {
-                                params = array(array(), logic.new_logic('*', {var = ''}, 2)),
+                                params = array(array(), logic.new_logic('*', array( {var = ''}, 2))),
                                 expected = array()
                             },
                             {
-                                params = array(nil, logic.new_logic('*', {var = ''}, 2)),
+                                params = array(nil, logic.new_logic('*', array( {var = ''}, 2))),
                                 expected = nil
                             },
                             {
@@ -618,21 +623,21 @@ describe(
                             {
                                 params = array(
                                     array(1, 2, 3, 4, 5),
-                                    logic.new_logic('+', {var = 'current'}, {var = 'accumulator'})
+                                    logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'}))
                                 ),
                                 expected = 15
                             },
                             {
                                 params = array(
                                     array(1, 2, 3, 4, 5),
-                                    logic.new_logic('*', {var = 'current'}, {var = 'accumulator'})
+                                    logic.new_logic('*', array( {var = 'current'}, {var = 'accumulator'}))
                                 ),
                                 expected = 120
                             },
                             {
                                 params = array(
                                     array(1, 2, 3, 4, 5),
-                                    logic.new_logic('+', {var = 'current'}, {var = 'accumulator'}),
+                                    logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'})),
                                     10
                                 ),
                                 expected = 25
@@ -642,11 +647,11 @@ describe(
                                 expected = {}
                             },
                             {
-                                params = array(array(), logic.new_logic('+', {var = 'current'}, {var = 'accumulator'})),
+                                params = array(array(), logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'}))),
                                 expected = nil
                             },
                             {
-                                params = array(nil, logic.new_logic('+', {var = 'current'}, {var = 'accumulator'})),
+                                params = array(nil, logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'}))),
                                 expected = nil
                             },
                             {
@@ -654,7 +659,7 @@ describe(
                                 expected = nil
                             },
                             {
-                                params = array(nil, logic.new_logic('+', {var = 'current'}, {var = 'accumulator'}), 0),
+                                params = array(nil, logic.new_logic('+', array({var = 'current'},{var = 'accumulator'})), 0),
                                 expected = 0
                             }
                         }
@@ -683,14 +688,14 @@ describe(
                     function()
                         -- do test
                         local test_table = {
-                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', {var = ''}, 0)), expected = true},
+                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array( {var = ''}, 0))), expected = true},
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', {var = ''}, 2)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array( {var = ''}, 2))),
                                 expected = false
                             },
                             {params = array(array(1, 2, 3, 4, 5), logic.new_logic()), expected = true},
-                            {params = array(array(), logic.new_logic('==', {var = ''}, 2)), expected = nil},
-                            {params = array(nil, logic.new_logic('==', {var = ''}, 2)), expected = nil},
+                            {params = array(array(), logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
+                            {params = array(nil, logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
                             {params = array(nil, nil), expected = nil}
                         }
                         logic_test(test_table)
@@ -717,18 +722,18 @@ describe(
                     function()
                         -- do test
                         local test_table = {
-                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', {var = ''}, 0)), expected = true},
+                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array( {var = ''}, 0))), expected = true},
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', {var = ''}, 0)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', array( {var = ''}, 0))),
                                 expected = false
                             },
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', {var = ''}, 2)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array( {var = ''}, 2))),
                                 expected = true
                             },
                             {params = array(array(1, 2, 3, 4, 5), logic.new_logic()), expected = true},
-                            {params = array(array(), logic.new_logic('==', {var = ''}, 2)), expected = nil},
-                            {params = array(nil, logic.new_logic('==', {var = ''}, 2)), expected = nil},
+                            {params = array(array(), logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
+                            {params = array(nil, logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
                             {params = array(nil, nil), expected = nil}
                         }
                         logic_test(test_table)
@@ -757,17 +762,17 @@ describe(
                         -- do test
                         local test_table = {
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', {var = ''}, 0)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array( {var = ''}, 0))),
                                 expected = false
                             },
-                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', {var = ''}, 0)), expected = true},
+                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', array( {var = ''}, 0))), expected = true},
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', {var = ''}, 2)),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array( {var = ''}, 2))),
                                 expected = false
                             },
                             {params = array(array(1, 2, 3, 4, 5), logic.new_logic()), expected = false},
-                            {params = array(array(), logic.new_logic('==', {var = ''}, 2)), expected = nil},
-                            {params = array(nil, logic.new_logic('==', {var = ''}, 2)), expected = nil},
+                            {params = array(array(), logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
+                            {params = array(nil, logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
                             {params = array(nil, nil), expected = nil}
                         }
                         logic_test(test_table)
@@ -877,7 +882,7 @@ describe(
     function()
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
-                local res = logic_apply(logic.new_logic('in', unpack(t.params)), t.data)
+                local res = logic_apply(logic.new_logic('in', t.params), t.data)
                 assert.message('failed at index: ' .. i).are.equal(t.expected, res)
             end
         end
@@ -1082,24 +1087,22 @@ end)
 describe("json-logic number test", function ()
     local function logic_test( test_table)
         for i, t in ipairs(test_table) do
-            local res = logic_apply(logic.new_logic(t.operator, unpack(t.params)), t.data)
-            assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
+            if t.expected ~= t.expected and res ~= res then
+                -- test nan
+            else
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
         end
     end
     describe("given two or more numbers", function ()
         it("should do the math :)", function ()
             local test_table = {
-                {operator = "max", params = array(1,10,3), expected = 10},
-                {operator = "min", params = array(-1,15,10), expected = -1},
-                {operator = "+", params = array(4,2), expected = 6},
+                {operator = "+", params = array(4,2,3), expected = 9},
                 {operator = "-", params = array(4,2), expected = 2},
                 {operator = "*", params = array(4,2), expected = 8},
                 {operator = "/", params = array(4,2), expected = 2},
-                {operator = "+", params = array(4,2,1,3,5), expected = 15},
                 {operator = "*", params = array(2,2,2,2,2), expected = 32},
-                {operator = "-", params = array(2), expected = -2},
-                {operator = "-", params = array(-2), expected = 2},
-                {operator = "+", params = array("3.14"), expected = 3.14},
                 {operator = "%", params = array(101,2), expected = 1},
                 {operator = ">", params = array(2,1), expected = true},
                 {operator = ">", params = array(3,4), expected = false},
@@ -1116,21 +1119,21 @@ describe("json-logic number test", function ()
                 {operator = "<=", params = array(1,2,3), expected = true},
                 {operator = "<=", params = array(1,1,3), expected = true},
                 {operator = "<=", params = array(1,4,3), expected = false},
+                {operator = "-", params = array(-2), expected = 2},
+                {operator = "-", params = array(2), expected = -2},
+                {operator = "max", params = array(1,10,3), expected = 10},
+                {operator = "min", params = array(-1,15,10), expected = -1},
             }
             logic_test(test_table)
         end)
     end)
-    describe("given two or more non numbers", function ()
+    describe("given two or more convertible non numbers", function ()
         it("should convert it to numbers and do the math", function ()
             local test_table = {
-                {operator = "max", params = array(array(1),array(array(10)),3), expected = 10},
-                {operator = "max", params = array(array(1),array(array("a","b")),3), expected = nil},
-                {operator = "max", params = array(array(1),{10},3), expected = nil},
-                {operator = "min", params = array(array(1),array(array(10)),3), expected = 1},
-                {operator = "min", params = array(array(1),array(array("a","b")),3), expected = nil},
-                {operator = "min", params = array(array(1),{10},3), expected = nil},
+                {operator = "+", params = array("3.14"), expected = 3.14},
+                {operator = "+", params = array(4,2,"1",3,5), expected = 15},
                 {operator = "+", params = array(array(4),"2"), expected = 6},
-                {operator = "+", params = array("4",array()), expected = 4},
+                {operator = "+", params = array("2"), expected = 2},
                 {operator = "-", params = array(array("2")), expected = -2},
                 {operator = "-", params = array(array("2") , array(1)), expected = 1},
                 {operator = "*", params = array(2,array(2),"2",array("2"),array(array(2))), expected = 32},
@@ -1151,6 +1154,47 @@ describe("json-logic number test", function ()
                 {operator = "<=", params = array(array(array(1)),2,"3"), expected = true},
                 {operator = "<=", params = array(1,array(array("1")),3), expected = true},
                 {operator = "<=", params = array(1,array(array(4)),3), expected = false},
+                {operator = "min", params = array(array(1),array(10),3), expected = 1},
+                {operator = "max", params = array(array(1),array(10),3), expected = 10},
+                {operator = "min", params = array(array(1),array(array(10)),3), expected = 1},
+                {operator = "max", params = array(array(1),array(array(10)),3), expected = 10}
+            }
+            logic_test(test_table)
+        end)
+    end)
+    describe("given parameters that includes number-inconvertible data", function ()
+        it("should return false when operator is comparison", function ()
+            local test_table = {
+                {operator = "<", params = array(4,{test = "test"},"1"), expected = false},
+                {operator = "<=", params = array(4,{test = "test"},"1"), expected = false},
+                {operator = ">", params = array(4,{test = "test"}), expected = false},
+                {operator = ">=", params = array(4,{test = "test"}), expected = false},
+            }
+            logic_test(test_table)
+        end)
+        it("should return string when operator is '+'", function ()
+            local test_table = {
+                {operator = "+", params = array(4,{2},"3"), expected = "4[object Object]3"},
+                {operator = "+", params = array(4,{test = "test"},"1"), expected = "4[object Object]1"},
+                {operator = "+", params = array("4",1,1), expected = "411"},
+                {operator = "+", params = array("4",array()), expected = "4"},
+            }
+            logic_test(test_table)
+        end)
+        it("should return nan when operator is '+' but arguments is 1", function ()
+            local test_table = {
+                {operator = "-", params = array({test = "test"}), expected = 0/0},
+                {operator = "-", params = array({3}), expected = 0/0},
+                {operator = "-", params = array(function()end), expected = 0/0},
+            }
+            logic_test(test_table)
+        end)
+        it("should return nan when operator for other aritmethic", function ()
+            local test_table = {
+                {operator = "-", params = array(4,{test = "test"},"1"), expected = 0/0},
+                {operator = "*", params = array(4,{test = "test"},"1"), expected = 0/0},
+                {operator = "/", params = array(4,{test = "test"},"1"), expected = 0/0},
+                {operator = "%", params = array(4,{test = "test"},"1"), expected = 0/0},
             }
             logic_test(test_table)
         end)
@@ -1160,7 +1204,7 @@ end)
 describe("json-logic equality test", function ()
     local function logic_test( test_table)
         for i, t in ipairs(test_table) do
-            local res = logic_apply(logic.new_logic(t.operator, unpack(t.params)), t.data)
+            local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
             assert.message('failed at index: ' .. i).are.equal(t.expected, res)
         end
     end
