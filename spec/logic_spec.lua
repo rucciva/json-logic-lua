@@ -2236,3 +2236,30 @@ describe("json-logic operation test", function ()
         end)
     end)
 end)
+
+describe("json-logic custom nil value", function ()
+    -- do test
+    local my_nil = {}
+    local null = function()
+        return my_nil
+    end
+    local function logic_test(test_table)
+        for i, t in ipairs(test_table) do
+            assert.message('failed at index: ' .. i).are.equal(t.expected, logic_apply(t.logic, t.data, {null = null}))
+        end
+    end
+
+    describe("given a logic with custom null function", function ()
+        local kv_data = {}
+        local test_table = {
+            {logic = {var = "attr3"}, data = {}, expected = my_nil},
+            {logic = {var = my_nil }, data = kv_data, expected = kv_data},
+            {logic = logic.new_logic("!", my_nil), data = {}, expected = true},
+            {logic = logic.new_logic("!!", my_nil), data = {}, expected = false},
+        }
+        it("should return custom nil value as defined in the null function", function ()
+            logic_test(test_table)
+        end)
+    end)
+    
+end)

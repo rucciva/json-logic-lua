@@ -12,6 +12,10 @@ local function is_array(tab)
     return getmetatable(tab) == array_mt
 end
 
+local function null()
+    return nil
+end
+
 local function string_starts(String, Start)
     return string.sub(String, 1, string.len(Start)) == Start
 end
@@ -84,7 +88,7 @@ local function js_is_equal(closure, a, b)
     if type(a) == type(b) then
         return a == b
     end
-    if a == nil or b == nil then
+    if closure.opts.is_nil(a) or closure.opts.is_nil(b) then
         return a == b
     end
 
@@ -213,7 +217,7 @@ end
 operations['<'] = function(closure, a, b, c)
     a = js_to_number(closure, a)
     b = js_to_number(closure, b)
-    if c == nil then
+    if closure.opts.is_nil(c) then
         return a == a and b == b and a < b
     else
         c = js_to_number(closure, c)
@@ -224,7 +228,7 @@ end
 operations['<='] = function(closure, a, b, c)
     a = js_to_number(closure, a)
     b = js_to_number(closure, b)
-    if c == nil then
+    if closure.opts.is_nil(c) then
         return a == a and b == b and a <= b
     else
         c = js_to_number(closure, c)
@@ -263,7 +267,7 @@ end
 
 operations['-'] = function(closure, a, b)
     a = js_to_number(closure, a)
-    if b == nil then
+    if closure.opts.is_nil(b) then
         return -a
     end
     b = js_to_number(closure, b)
@@ -339,14 +343,14 @@ operations['cat'] = function(closure, ...)
     return res
 end
 
-operations['substr'] = function(_, source, st, en)
-    if st == nil then
+operations['substr'] = function(closure, source, st, en)
+    if closure.opts.is_nil(st) then
         return source
     end
     if st >= 0 then
         st = st + 1
     end
-    if en == nil then
+    if closure.opts.is_nil(en) then
         return string.sub(source, st)
     end
     if en >= 0 then
@@ -376,34 +380,34 @@ operations['merge'] = function(closure, ...)
 end
 
 operations['var'] = function(closure, attr, default)
-    local data = closure.data
-    if attr == nil or attr == '' then
+    local data = closure.data    
+    if closure.opts.is_nil(attr) or attr == '' then
         return data
     end
 
-    if data == nil or type(data) ~= 'table' then
+    if closure.opts.is_nil(data) or type(data) ~= 'table' then
         return data
     end
 
     if type(attr) == 'number' then
         local val = data[attr + 1]
-        if val == nil then
+        if closure.opts.is_nil(val) then
             return default
         end
         return val
     end
 
     if type(attr) ~= 'string' then
-        return nil
+        return closure.opts.null()
     end
 
     if (string_starts(attr, '.') or string_ends(attr, '.')) then
-        return nil
+        return closure.opts.null()
     end
 
     for sub in attr:gmatch('([^\\.]+)') do
         data = data[sub]
-        if data == nil then
+        if closure.opts.is_nil(data) then
             return default
         end
     end
@@ -419,7 +423,7 @@ operations['missing'] = function(closure, ...)
 
     for _, attr in ipairs(keys) do
         local val = operations.var(closure, attr)
-        if val == nil or val == '' then
+        if closure.opts.is_nil(val) or val == '' then
             table.insert(missing, attr)
         end
     end
@@ -435,16 +439,16 @@ operations['missing_some'] = function(closure, minimum, keys)
     end
 end
 
-operations['method'] = function(_, obj, method, ...)
+operations['method'] = function(closure, obj, method, ...)
     if obj ~= nil and method ~= nil then
         return obj[method](obj, unpack(arg))
     end
-    return nil
+    return closure.opts.null()
 end
 
 operations['join'] = function(closure, separator, items)
     if not closure.opts.is_array(items) then
-        return nil
+        return closure.opts.null()
     end
     if not js_to_boolean(closure, separator) then
         return js_to_string(closure, items)
@@ -1187,15 +1191,15 @@ function JsonLogic.apply(logic, data, opts)
     opts.array = function(...)
         return opts.mark_as_array({...})
     end
+    if type(opts.null) ~= 'function' then
+        opts.null = null
+    end
     opts.is_nil = function(v)
-        if type(opts.null) == 'function' then
-            return v == nil or v == opts.null()
-        end
-        return v == nil
+        return v == opts.null() or v == nil
     end
     closure.opts = opts
 
-    local last_child_result = nil
+    local last_child_result = opts.null()
     local err = nil
 
     -- since lua does not have "continue" like statement, we use two loops
@@ -1230,6 +1234,11 @@ function JsonLogic.apply(logic, data, opts)
                 closure, last_child_result, err = recurser[op](stack, closure, last_child_result)
             else
                 closure, last_child_result, err = recurse_others(stack, closure, last_child_result)
+            end
+            
+            -- if the result is nil then return the specified null value
+            if last_child_result == nil then
+                last_child_result = opts.null()
             end
         end
     end
