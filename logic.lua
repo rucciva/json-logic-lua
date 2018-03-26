@@ -36,8 +36,8 @@ local function is_logic(tab, opts)
     return is_object and contains_one_key
 end
 
-local function js_to_boolean(value)
-    if value == 0 or value == '' or value == '' then
+local function js_to_boolean(closure, value)
+    if value == 0 or value == '' or value == '' or closure.opts.is_nil(value) then
         return false
     end
     if type(value) == 'number' and value ~= value then
@@ -174,12 +174,12 @@ end
 local operations = {}
 operations.__index = operations
 
-operations['!!'] = function(_, a)
-    return js_to_boolean(a)
+operations['!!'] = function(closure, a)
+    return js_to_boolean(closure, a)
 end
 
-operations['!'] = function(_, a)
-    return not js_to_boolean(a)
+operations['!'] = function(closure, a)
+    return not js_to_boolean(closure, a)
 end
 
 operations['=='] = function(closure, a, b)
@@ -446,7 +446,7 @@ operations['join'] = function(closure, separator, items)
     if not closure.opts.is_array(items) then
         return nil
     end
-    if not js_to_boolean(separator) then
+    if not js_to_boolean(closure, separator) then
         return js_to_string(items, closure.opts)
     end
 
@@ -530,20 +530,19 @@ end
 
 local recurser = {}
 
+-- 'if' should be called with a odd number of parameters, 3 or greater
+-- This works on the pattern:
+-- if( 0 ){ 1 }else{ 2 };
+-- if( 0 ){ 1 }else if( 2 ){ 3 }else{ 4 };
+-- if( 0 ){ 1 }else if( 2 ){ 3 }else if( 4 ){ 5 }else{ 6 };
+-- The implementation is:
+-- For pairs of values (0,1 then 2,3 then 4,5 etc)
+-- If the first evaluates truthy, evaluate and return the second
+-- If the first evaluates falsy, jump to the next pair (e.g, 0,1 to 2,3)
+-- given one parameter, evaluate and return it. (it's an Else and all the If/ElseIf were false)
+-- given 0 parameters, return NULL (not great practice, but there was no Else)
 recurser['if'] =
     function(stack, closure, last_child_result)
-    -- 'if' should be called with a odd number of parameters, 3 or greater
-    -- This works on the pattern:
-    -- if( 0 ){ 1 }else{ 2 };
-    -- if( 0 ){ 1 }else if( 2 ){ 3 }else{ 4 };
-    -- if( 0 ){ 1 }else if( 2 ){ 3 }else if( 4 ){ 5 }else{ 6 };
-    -- The implementation is:
-    -- For pairs of values (0,1 then 2,3 then 4,5 etc)
-    -- If the first evaluates truthy, evaluate and return the second
-    -- If the first evaluates falsy, jump to the next pair (e.g, 0,1 to 2,3)
-    -- given one parameter, evaluate and return it. (it's an Else and all the If/ElseIf were false)
-    -- given 0 parameters, return NULL (not great practice, but there was no Else)
-
     local op = get_operator(closure.logic)
 
     -- zero or one length
@@ -574,7 +573,7 @@ recurser['if'] =
     --
 
     if closure.state.index % 2 == 1 and closure.state.index < closure.state.length then
-        if js_to_boolean(closure.state.normalized[op][closure.state.index]) then
+        if js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) then
             -- closure conditions is true
             closure.state.index = closure.state.index + 1
         else
@@ -622,7 +621,7 @@ recurser['and'] =
     closure.state.normalized[op][closure.state.index] = last_child_result
     --
 
-    if js_to_boolean(closure.state.normalized[op][closure.state.index]) and closure.state.index < closure.state.length then
+    if js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) and closure.state.index < closure.state.length then
         -- closure condition is true
         closure.state.index = closure.state.index + 1
     else
@@ -667,7 +666,7 @@ recurser['or'] =
     --
 
     if
-        not js_to_boolean(closure.state.normalized[op][closure.state.index]) and
+        not js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) and
             closure.state.index < closure.state.length
      then
         -- if true then continue next
@@ -734,7 +733,7 @@ recurser['filter'] =
         }
         return closure, last_child_result
     end
-    if js_to_boolean(last_child_result) then
+    if js_to_boolean(closure, last_child_result) then
         table.insert(closure.state.result, scoped_data[closure.state.index])
     end
     --
@@ -944,10 +943,10 @@ recurser['all'] =
     end
     --
 
-    if js_to_boolean(last_child_result) and closure.state.index < closure.state.length then
+    if js_to_boolean(closure, last_child_result) and closure.state.index < closure.state.length then
         closure.state.index = closure.state.index + 1
     else
-        last_child_result = js_to_boolean(last_child_result)
+        last_child_result = js_to_boolean(closure, last_child_result)
         closure = table.remove(stack)
     end
     return closure, last_child_result
@@ -1010,10 +1009,10 @@ recurser['some'] =
     end
     --
 
-    if not js_to_boolean(last_child_result) and closure.state.index < closure.state.length then
+    if not js_to_boolean(closure, last_child_result) and closure.state.index < closure.state.length then
         closure.state.index = closure.state.index + 1
     else
-        last_child_result = js_to_boolean(last_child_result)
+        last_child_result = js_to_boolean(closure, last_child_result)
         closure = table.remove(stack)
     end
     return closure, last_child_result
@@ -1076,10 +1075,10 @@ recurser['none'] =
     end
     --
 
-    if not js_to_boolean(last_child_result) and closure.state.index < closure.state.length then
+    if not js_to_boolean(closure, last_child_result) and closure.state.index < closure.state.length then
         closure.state.index = closure.state.index + 1
     else
-        last_child_result = not js_to_boolean(last_child_result)
+        last_child_result = not js_to_boolean(closure, last_child_result)
         closure = table.remove(stack)
     end
     return closure, last_child_result
@@ -1155,8 +1154,9 @@ local JsonLogic = {}
 -- apply the json-logic with the given data
 -- some behavior of json-logic can be influenced by 'opts' table
 -- 'opts' can include the following attribute:
---   is_array = (function), a function that determine wether a table is an array or not
---   mark_as_array = (function), a function that mark a lua table as an array
+--   is_array = (function), determine wether a table is an array or not
+--   mark_as_array = (function), mark a lua table as an array
+--   null = (function), return value that represent json nill value
 --   custom_operations = (table), a table contains custom operations
 --   blacklist = (table), an array contains list of operations to be blacklisted.
 --   whitelist = (table), an array contains list of operations to be whitelisted.
@@ -1186,6 +1186,12 @@ function JsonLogic.apply(logic, data, opts)
     end
     opts.array = function(...)
         return opts.mark_as_array({...})
+    end
+    opts.is_nil = function(v)
+        if type(opts.null) == 'function' then
+            return v == nil or v == opts.null()
+        end
+        return v == nil
     end
     closure.opts = opts
 
