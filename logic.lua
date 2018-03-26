@@ -103,20 +103,20 @@ local function js_is_equal(closure, a, b)
     return a_num == b_num
 end
 
-local function js_array_to_string(a, opts)
+local function js_array_to_string(closure, a)
     local res = ''
     local stack = {}
-    local closure = {
+    local local_closure = {
         table = a,
         index = 1
     }
     local first = true
-    while closure ~= nil do
+    while local_closure ~= nil do
         local fully_iterated = true
-        for i = closure.index, #closure.table, 1 do
-            local v = closure.table[i]
+        for i = local_closure.index, #local_closure.table, 1 do
+            local v = local_closure.table[i]
             local str
-            if opts.is_array(v) then
+            if closure.opts.is_array(v) then
                 -- prevent recursive loop
                 local recurse = false
                 for _, saved in pairs(stack) do
@@ -131,9 +131,9 @@ local function js_array_to_string(a, opts)
                 --
 
                 -- add to stack
-                closure.index = i + 1
-                table.insert(stack, closure)
-                closure = {table = v, index = 1}
+                local_closure.index = i + 1
+                table.insert(stack, local_closure)
+                local_closure = {table = v, index = 1}
                 fully_iterated = false
                 --
                 break
@@ -153,15 +153,15 @@ local function js_array_to_string(a, opts)
         end
 
         if fully_iterated then
-            closure = table.remove(stack)
+            local_closure = table.remove(stack)
         end
     end
     return res
 end
 
-local function js_to_string(a, opts)
-    if opts.is_array(a) then
-        return js_array_to_string(a, opts)
+local function js_to_string(closure, a)
+    if closure.opts.is_array(a) then
+        return js_array_to_string(closure, a)
     elseif type(a) == 'table' then
         -- object
         return '[object Object]'
@@ -240,13 +240,13 @@ operations['+'] = function(closure, ...)
         end
 
         if type(a) == 'string' then
-            a = a .. js_to_string(v, closure.opts)
+            a = a .. js_to_string(closure, v)
         else
             local n = js_to_number(closure, v)
             if n == n then
                 a = a + n
             else
-                a = js_to_string(a, closure.opts) .. js_to_string(v, closure.opts)
+                a = js_to_string(closure, a) .. js_to_string(closure, v)
             end
         end
     end
@@ -334,7 +334,7 @@ operations['cat'] = function(closure, ...)
     arg['n'] = nil
     local res = ''
     for _, v in ipairs(arg) do
-        res = res .. js_to_string(v, closure.opts)
+        res = res .. js_to_string(closure, v)
     end
     return res
 end
@@ -447,15 +447,15 @@ operations['join'] = function(closure, separator, items)
         return nil
     end
     if not js_to_boolean(closure, separator) then
-        return js_to_string(items, closure.opts)
+        return js_to_string(closure, items)
     end
 
     local res = ''
     for i, v in ipairs(items) do
         if i > 1 then
-            res = res .. js_to_string(separator, closure.opts)
+            res = res .. js_to_string(closure, separator)
         end
-        res = res .. js_to_string(v, closure.opts)
+        res = res .. js_to_string(closure, v)
     end
     return res
 end
