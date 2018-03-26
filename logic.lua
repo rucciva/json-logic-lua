@@ -46,10 +46,10 @@ local function js_to_boolean(closure, value)
     return not (not value)
 end
 
-local function js_reducible_array_to_string(value, opts)
-    if opts.is_array(value) then
+local function js_reducible_array_to_string(closure, value)
+    if closure.opts.is_array(value) then
         local newval = value
-        while #newval == 1 and opts.is_array(newval[1]) do
+        while #newval == 1 and closure.opts.is_array(newval[1]) do
             -- reduce array that only contain array
             newval = newval[1]
         end
@@ -62,8 +62,8 @@ local function js_reducible_array_to_string(value, opts)
     return value
 end
 
-local function js_to_number(value, opts)
-    value = js_reducible_array_to_string(value, opts)
+local function js_to_number(closure, value)
+    value = js_reducible_array_to_string(closure, value)
 
     if value == 0 or value == '' or value == '0' or value == false then
         return 0
@@ -80,7 +80,7 @@ local function js_to_number(value, opts)
     return n
 end
 
-local function js_is_equal(a, b, opts)
+local function js_is_equal(closure, a, b)
     if type(a) == type(b) then
         return a == b
     end
@@ -89,17 +89,17 @@ local function js_is_equal(a, b, opts)
     end
 
     -- handle empty or single item array
-    if opts.is_array(a) or opts.is_array(b) then
-        local a_ar = js_reducible_array_to_string(a, opts)
-        local b_ar = js_reducible_array_to_string(b, opts)
+    if closure.opts.is_array(a) or closure.opts.is_array(b) then
+        local a_ar = js_reducible_array_to_string(closure, a)
+        local b_ar = js_reducible_array_to_string(closure, b)
         if type(a_ar) == 'string' and type(b_ar) == 'string' then
             return a_ar == b_ar
         end
     end
 
     -- convert to number
-    local a_num = js_to_number(a, opts)
-    local b_num = js_to_number(b, opts)
+    local a_num = js_to_number(closure, a)
+    local b_num = js_to_number(closure, b)
     return a_num == b_num
 end
 
@@ -183,7 +183,7 @@ operations['!'] = function(closure, a)
 end
 
 operations['=='] = function(closure, a, b)
-    return js_is_equal(a, b, closure.opts)
+    return js_is_equal(closure, a, b)
 end
 
 operations['==='] = function(_, a, b)
@@ -191,7 +191,7 @@ operations['==='] = function(_, a, b)
 end
 
 operations['!='] = function(closure, a, b)
-    return not js_is_equal(a, b, closure.opts)
+    return not js_is_equal(closure, a, b)
 end
 
 operations['!=='] = function(_, a, b)
@@ -199,35 +199,35 @@ operations['!=='] = function(_, a, b)
 end
 
 operations['>'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a == a and b == b and a > b
 end
 
 operations['>='] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a == a and b == b and a >= b
 end
 
 operations['<'] = function(closure, a, b, c)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     if c == nil then
         return a == a and b == b and a < b
     else
-        c = js_to_number(c, closure.opts)
+        c = js_to_number(closure, c)
         return a == a and b == b and c == c and a < b and b < c
     end
 end
 
 operations['<='] = function(closure, a, b, c)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     if c == nil then
         return a == a and b == b and a <= b
     else
-        c = js_to_number(c, closure.opts)
+        c = js_to_number(closure, c)
         return a == a and b == b and c == c and a <= b and b <= c
     end
 end
@@ -242,7 +242,7 @@ operations['+'] = function(closure, ...)
         if type(a) == 'string' then
             a = a .. js_to_string(v, closure.opts)
         else
-            local n = js_to_number(v, closure.opts)
+            local n = js_to_number(closure, v)
             if n == n then
                 a = a + n
             else
@@ -256,35 +256,35 @@ end
 operations['*'] = function(closure, ...)
     local a = 1
     for _, v in ipairs(arg) do
-        a = a * js_to_number(v, closure.opts)
+        a = a * js_to_number(closure, v)
     end
     return a
 end
 
 operations['-'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
+    a = js_to_number(closure, a)
     if b == nil then
         return -a
     end
-    b = js_to_number(b, closure.opts)
+    b = js_to_number(closure, b)
     return a - b
 end
 
 operations['/'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a / b
 end
 
 operations['%'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a % b
 end
 
 operations['min'] = function(closure, ...)
     for i, v in ipairs(arg) do
-        v = js_to_number(v, closure.opts)
+        v = js_to_number(closure, v)
         if v ~= v then
             return v
         end
@@ -295,7 +295,7 @@ end
 
 operations['max'] = function(closure, ...)
     for i, v in ipairs(arg) do
-        v = js_to_number(v, closure.opts)
+        v = js_to_number(closure, v)
         if v ~= v then
             return v
         end
