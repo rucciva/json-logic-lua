@@ -2238,10 +2238,10 @@ describe("json-logic operation test", function ()
 end)
 
 describe("json-logic custom nil value", function ()
-    -- do test
-    local my_nil = {}
+    -- some json decoder (e.g. lua cjson) use a custom value to represent json null instead of using lua nil value
+    local custom_nil = {}
     local null = function()
-        return my_nil
+        return custom_nil
     end
     local function logic_test(test_table)
         for i, t in ipairs(test_table) do
@@ -2252,14 +2252,13 @@ describe("json-logic custom nil value", function ()
     describe("given a logic with custom null function", function ()
         local kv_data = {}
         local test_table = {
-            {logic = {var = "attr3"}, data = {}, expected = my_nil},
-            {logic = {var = my_nil }, data = kv_data, expected = kv_data},
-            {logic = logic.new_logic("!", my_nil), data = {}, expected = true},
-            {logic = logic.new_logic("!!", my_nil), data = {}, expected = false},
+            {logic = {var = "attr3"}, data = {}, expected = custom_nil},
+            {logic = {var = custom_nil }, data = kv_data, expected = kv_data},
+            {logic = logic.new_logic("!", custom_nil), data = {}, expected = true},
+            {logic = logic.new_logic("!!", custom_nil), data = {}, expected = false},
         }
         it("should return custom nil value as defined in the null function", function ()
             logic_test(test_table)
         end)
     end)
-    
 end)
