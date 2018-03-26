@@ -12,6 +12,10 @@ local function is_array(tab)
     return getmetatable(tab) == array_mt
 end
 
+local function null()
+    return nil
+end
+
 local function string_starts(String, Start)
     return string.sub(String, 1, string.len(Start)) == Start
 end
@@ -20,8 +24,8 @@ local function string_ends(String, End)
     return End == '' or string.sub(String, -string.len(End)) == End
 end
 
-local function is_logic(tab, opts)
-    local is_object = type(tab) == 'table' and tab ~= nil and opts.is_array(tab) == false
+local function is_logic(closure, tab)
+    local is_object = type(tab) == 'table' and not closure.opts.is_nil(tab) and not closure.opts.is_array(tab)
     if is_object == false then
         return false
     end
@@ -36,8 +40,8 @@ local function is_logic(tab, opts)
     return is_object and contains_one_key
 end
 
-local function js_to_boolean(value)
-    if value == 0 or value == '' or value == '' then
+local function js_to_boolean(closure, value)
+    if value == 0 or value == '' or value == '' or closure.opts.is_nil(value) then
         return false
     end
     if type(value) == 'number' and value ~= value then
@@ -46,10 +50,10 @@ local function js_to_boolean(value)
     return not (not value)
 end
 
-local function js_reducible_array_to_string(value, opts)
-    if opts.is_array(value) then
+local function js_reducible_array_to_string(closure, value)
+    if closure.opts.is_array(value) then
         local newval = value
-        while #newval == 1 and opts.is_array(newval[1]) do
+        while #newval == 1 and closure.opts.is_array(newval[1]) do
             -- reduce array that only contain array
             newval = newval[1]
         end
@@ -62,8 +66,8 @@ local function js_reducible_array_to_string(value, opts)
     return value
 end
 
-local function js_to_number(value, opts)
-    value = js_reducible_array_to_string(value, opts)
+local function js_to_number(closure, value)
+    value = js_reducible_array_to_string(closure, value)
 
     if value == 0 or value == '' or value == '0' or value == false then
         return 0
@@ -80,43 +84,43 @@ local function js_to_number(value, opts)
     return n
 end
 
-local function js_is_equal(a, b, opts)
+local function js_is_equal(closure, a, b)
     if type(a) == type(b) then
         return a == b
     end
-    if a == nil or b == nil then
+    if closure.opts.is_nil(a) or closure.opts.is_nil(b) then
         return a == b
     end
 
     -- handle empty or single item array
-    if opts.is_array(a) or opts.is_array(b) then
-        local a_ar = js_reducible_array_to_string(a, opts)
-        local b_ar = js_reducible_array_to_string(b, opts)
+    if closure.opts.is_array(a) or closure.opts.is_array(b) then
+        local a_ar = js_reducible_array_to_string(closure, a)
+        local b_ar = js_reducible_array_to_string(closure, b)
         if type(a_ar) == 'string' and type(b_ar) == 'string' then
             return a_ar == b_ar
         end
     end
 
     -- convert to number
-    local a_num = js_to_number(a, opts)
-    local b_num = js_to_number(b, opts)
+    local a_num = js_to_number(closure, a)
+    local b_num = js_to_number(closure, b)
     return a_num == b_num
 end
 
-local function js_array_to_string(a, opts)
+local function js_array_to_string(closure, a)
     local res = ''
     local stack = {}
-    local closure = {
+    local local_closure = {
         table = a,
         index = 1
     }
     local first = true
-    while closure ~= nil do
+    while local_closure ~= nil do
         local fully_iterated = true
-        for i = closure.index, #closure.table, 1 do
-            local v = closure.table[i]
+        for i = local_closure.index, #local_closure.table, 1 do
+            local v = local_closure.table[i]
             local str
-            if opts.is_array(v) then
+            if closure.opts.is_array(v) then
                 -- prevent recursive loop
                 local recurse = false
                 for _, saved in pairs(stack) do
@@ -131,9 +135,9 @@ local function js_array_to_string(a, opts)
                 --
 
                 -- add to stack
-                closure.index = i + 1
-                table.insert(stack, closure)
-                closure = {table = v, index = 1}
+                local_closure.index = i + 1
+                table.insert(stack, local_closure)
+                local_closure = {table = v, index = 1}
                 fully_iterated = false
                 --
                 break
@@ -153,15 +157,15 @@ local function js_array_to_string(a, opts)
         end
 
         if fully_iterated then
-            closure = table.remove(stack)
+            local_closure = table.remove(stack)
         end
     end
     return res
 end
 
-local function js_to_string(a, opts)
-    if opts.is_array(a) then
-        return js_array_to_string(a, opts)
+local function js_to_string(closure, a)
+    if closure.opts.is_array(a) then
+        return js_array_to_string(closure, a)
     elseif type(a) == 'table' then
         -- object
         return '[object Object]'
@@ -174,16 +178,16 @@ end
 local operations = {}
 operations.__index = operations
 
-operations['!!'] = function(_, a)
-    return js_to_boolean(a)
+operations['!!'] = function(closure, a)
+    return js_to_boolean(closure, a)
 end
 
-operations['!'] = function(_, a)
-    return not js_to_boolean(a)
+operations['!'] = function(closure, a)
+    return not js_to_boolean(closure, a)
 end
 
 operations['=='] = function(closure, a, b)
-    return js_is_equal(a, b, closure.opts)
+    return js_is_equal(closure, a, b)
 end
 
 operations['==='] = function(_, a, b)
@@ -191,7 +195,7 @@ operations['==='] = function(_, a, b)
 end
 
 operations['!='] = function(closure, a, b)
-    return not js_is_equal(a, b, closure.opts)
+    return not js_is_equal(closure, a, b)
 end
 
 operations['!=='] = function(_, a, b)
@@ -199,35 +203,35 @@ operations['!=='] = function(_, a, b)
 end
 
 operations['>'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a == a and b == b and a > b
 end
 
 operations['>='] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a == a and b == b and a >= b
 end
 
 operations['<'] = function(closure, a, b, c)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
-    if c == nil then
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
+    if closure.opts.is_nil(c) then
         return a == a and b == b and a < b
     else
-        c = js_to_number(c, closure.opts)
+        c = js_to_number(closure, c)
         return a == a and b == b and c == c and a < b and b < c
     end
 end
 
 operations['<='] = function(closure, a, b, c)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
-    if c == nil then
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
+    if closure.opts.is_nil(c) then
         return a == a and b == b and a <= b
     else
-        c = js_to_number(c, closure.opts)
+        c = js_to_number(closure, c)
         return a == a and b == b and c == c and a <= b and b <= c
     end
 end
@@ -240,13 +244,13 @@ operations['+'] = function(closure, ...)
         end
 
         if type(a) == 'string' then
-            a = a .. js_to_string(v, closure.opts)
+            a = a .. js_to_string(closure, v)
         else
-            local n = js_to_number(v, closure.opts)
+            local n = js_to_number(closure, v)
             if n == n then
                 a = a + n
             else
-                a = js_to_string(a, closure.opts) .. js_to_string(v, closure.opts)
+                a = js_to_string(closure, a) .. js_to_string(closure, v)
             end
         end
     end
@@ -256,35 +260,35 @@ end
 operations['*'] = function(closure, ...)
     local a = 1
     for _, v in ipairs(arg) do
-        a = a * js_to_number(v, closure.opts)
+        a = a * js_to_number(closure, v)
     end
     return a
 end
 
 operations['-'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    if b == nil then
+    a = js_to_number(closure, a)
+    if closure.opts.is_nil(b) then
         return -a
     end
-    b = js_to_number(b, closure.opts)
+    b = js_to_number(closure, b)
     return a - b
 end
 
 operations['/'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a / b
 end
 
 operations['%'] = function(closure, a, b)
-    a = js_to_number(a, closure.opts)
-    b = js_to_number(b, closure.opts)
+    a = js_to_number(closure, a)
+    b = js_to_number(closure, b)
     return a % b
 end
 
 operations['min'] = function(closure, ...)
     for i, v in ipairs(arg) do
-        v = js_to_number(v, closure.opts)
+        v = js_to_number(closure, v)
         if v ~= v then
             return v
         end
@@ -295,7 +299,7 @@ end
 
 operations['max'] = function(closure, ...)
     for i, v in ipairs(arg) do
-        v = js_to_number(v, closure.opts)
+        v = js_to_number(closure, v)
         if v ~= v then
             return v
         end
@@ -334,19 +338,19 @@ operations['cat'] = function(closure, ...)
     arg['n'] = nil
     local res = ''
     for _, v in ipairs(arg) do
-        res = res .. js_to_string(v, closure.opts)
+        res = res .. js_to_string(closure, v)
     end
     return res
 end
 
-operations['substr'] = function(_, source, st, en)
-    if st == nil then
+operations['substr'] = function(closure, source, st, en)
+    if closure.opts.is_nil(st) then
         return source
     end
     if st >= 0 then
         st = st + 1
     end
-    if en == nil then
+    if closure.opts.is_nil(en) then
         return string.sub(source, st)
     end
     if en >= 0 then
@@ -376,34 +380,34 @@ operations['merge'] = function(closure, ...)
 end
 
 operations['var'] = function(closure, attr, default)
-    local data = closure.data
-    if attr == nil or attr == '' then
+    local data = closure.data    
+    if closure.opts.is_nil(attr) or attr == '' then
         return data
     end
 
-    if data == nil or type(data) ~= 'table' then
+    if closure.opts.is_nil(data) or type(data) ~= 'table' then
         return data
     end
 
     if type(attr) == 'number' then
         local val = data[attr + 1]
-        if val == nil then
+        if closure.opts.is_nil(val) then
             return default
         end
         return val
     end
 
     if type(attr) ~= 'string' then
-        return nil
+        return closure.opts.null()
     end
 
     if (string_starts(attr, '.') or string_ends(attr, '.')) then
-        return nil
+        return closure.opts.null()
     end
 
     for sub in attr:gmatch('([^\\.]+)') do
         data = data[sub]
-        if data == nil then
+        if closure.opts.is_nil(data) then
             return default
         end
     end
@@ -419,7 +423,7 @@ operations['missing'] = function(closure, ...)
 
     for _, attr in ipairs(keys) do
         local val = operations.var(closure, attr)
-        if val == nil or val == '' then
+        if closure.opts.is_nil(val) or val == '' then
             table.insert(missing, attr)
         end
     end
@@ -435,27 +439,27 @@ operations['missing_some'] = function(closure, minimum, keys)
     end
 end
 
-operations['method'] = function(_, obj, method, ...)
+operations['method'] = function(closure, obj, method, ...)
     if obj ~= nil and method ~= nil then
         return obj[method](obj, unpack(arg))
     end
-    return nil
+    return closure.opts.null()
 end
 
 operations['join'] = function(closure, separator, items)
     if not closure.opts.is_array(items) then
-        return nil
+        return closure.opts.null()
     end
-    if not js_to_boolean(separator) then
-        return js_to_string(items, closure.opts)
+    if not js_to_boolean(closure, separator) then
+        return js_to_string(closure, items)
     end
 
     local res = ''
     for i, v in ipairs(items) do
         if i > 1 then
-            res = res .. js_to_string(separator, closure.opts)
+            res = res .. js_to_string(closure, separator)
         end
-        res = res .. js_to_string(v, closure.opts)
+        res = res .. js_to_string(closure, v)
     end
     return res
 end
@@ -530,20 +534,19 @@ end
 
 local recurser = {}
 
+-- 'if' should be called with a odd number of parameters, 3 or greater
+-- This works on the pattern:
+-- if( 0 ){ 1 }else{ 2 };
+-- if( 0 ){ 1 }else if( 2 ){ 3 }else{ 4 };
+-- if( 0 ){ 1 }else if( 2 ){ 3 }else if( 4 ){ 5 }else{ 6 };
+-- The implementation is:
+-- For pairs of values (0,1 then 2,3 then 4,5 etc)
+-- If the first evaluates truthy, evaluate and return the second
+-- If the first evaluates falsy, jump to the next pair (e.g, 0,1 to 2,3)
+-- given one parameter, evaluate and return it. (it's an Else and all the If/ElseIf were false)
+-- given 0 parameters, return NULL (not great practice, but there was no Else)
 recurser['if'] =
     function(stack, closure, last_child_result)
-    -- 'if' should be called with a odd number of parameters, 3 or greater
-    -- This works on the pattern:
-    -- if( 0 ){ 1 }else{ 2 };
-    -- if( 0 ){ 1 }else if( 2 ){ 3 }else{ 4 };
-    -- if( 0 ){ 1 }else if( 2 ){ 3 }else if( 4 ){ 5 }else{ 6 };
-    -- The implementation is:
-    -- For pairs of values (0,1 then 2,3 then 4,5 etc)
-    -- If the first evaluates truthy, evaluate and return the second
-    -- If the first evaluates falsy, jump to the next pair (e.g, 0,1 to 2,3)
-    -- given one parameter, evaluate and return it. (it's an Else and all the If/ElseIf were false)
-    -- given 0 parameters, return NULL (not great practice, but there was no Else)
-
     local op = get_operator(closure.logic)
 
     -- zero or one length
@@ -574,7 +577,7 @@ recurser['if'] =
     --
 
     if closure.state.index % 2 == 1 and closure.state.index < closure.state.length then
-        if js_to_boolean(closure.state.normalized[op][closure.state.index]) then
+        if js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) then
             -- closure conditions is true
             closure.state.index = closure.state.index + 1
         else
@@ -622,7 +625,7 @@ recurser['and'] =
     closure.state.normalized[op][closure.state.index] = last_child_result
     --
 
-    if js_to_boolean(closure.state.normalized[op][closure.state.index]) and closure.state.index < closure.state.length then
+    if js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) and closure.state.index < closure.state.length then
         -- closure condition is true
         closure.state.index = closure.state.index + 1
     else
@@ -667,7 +670,7 @@ recurser['or'] =
     --
 
     if
-        not js_to_boolean(closure.state.normalized[op][closure.state.index]) and
+        not js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) and
             closure.state.index < closure.state.length
      then
         -- if true then continue next
@@ -734,7 +737,7 @@ recurser['filter'] =
         }
         return closure, last_child_result
     end
-    if js_to_boolean(last_child_result) then
+    if js_to_boolean(closure, last_child_result) then
         table.insert(closure.state.result, scoped_data[closure.state.index])
     end
     --
@@ -944,10 +947,10 @@ recurser['all'] =
     end
     --
 
-    if js_to_boolean(last_child_result) and closure.state.index < closure.state.length then
+    if js_to_boolean(closure, last_child_result) and closure.state.index < closure.state.length then
         closure.state.index = closure.state.index + 1
     else
-        last_child_result = js_to_boolean(last_child_result)
+        last_child_result = js_to_boolean(closure, last_child_result)
         closure = table.remove(stack)
     end
     return closure, last_child_result
@@ -1010,10 +1013,10 @@ recurser['some'] =
     end
     --
 
-    if not js_to_boolean(last_child_result) and closure.state.index < closure.state.length then
+    if not js_to_boolean(closure, last_child_result) and closure.state.index < closure.state.length then
         closure.state.index = closure.state.index + 1
     else
-        last_child_result = js_to_boolean(last_child_result)
+        last_child_result = js_to_boolean(closure, last_child_result)
         closure = table.remove(stack)
     end
     return closure, last_child_result
@@ -1076,10 +1079,10 @@ recurser['none'] =
     end
     --
 
-    if not js_to_boolean(last_child_result) and closure.state.index < closure.state.length then
+    if not js_to_boolean(closure, last_child_result) and closure.state.index < closure.state.length then
         closure.state.index = closure.state.index + 1
     else
-        last_child_result = not js_to_boolean(last_child_result)
+        last_child_result = not js_to_boolean(closure, last_child_result)
         closure = table.remove(stack)
     end
     return closure, last_child_result
@@ -1155,8 +1158,9 @@ local JsonLogic = {}
 -- apply the json-logic with the given data
 -- some behavior of json-logic can be influenced by 'opts' table
 -- 'opts' can include the following attribute:
---   is_array = (function), a function that determine wether a table is an array or not
---   mark_as_array = (function), a function that mark a lua table as an array
+--   is_array = (function), determine wether a table is an array or not
+--   mark_as_array = (function), mark a lua table as an array
+--   null = (function), return value that represent json nill value
 --   custom_operations = (table), a table contains custom operations
 --   blacklist = (table), an array contains list of operations to be blacklisted.
 --   whitelist = (table), an array contains list of operations to be whitelisted.
@@ -1187,9 +1191,15 @@ function JsonLogic.apply(logic, data, opts)
     opts.array = function(...)
         return opts.mark_as_array({...})
     end
+    if type(opts.null) ~= 'function' then
+        opts.null = null
+    end
+    opts.is_nil = function(v)
+        return v == opts.null() or v == nil
+    end
     closure.opts = opts
 
-    local last_child_result = nil
+    local last_child_result = opts.null()
     local err = nil
 
     -- since lua does not have "continue" like statement, we use two loops
@@ -1202,7 +1212,7 @@ function JsonLogic.apply(logic, data, opts)
             end
 
             -- You've recursed to a primitive, stop!
-            if not is_logic(closure.logic, opts) then
+            if not is_logic(closure, closure.logic) then
                 last_child_result = closure.logic
                 closure = table.remove(stack)
                 break
@@ -1224,6 +1234,11 @@ function JsonLogic.apply(logic, data, opts)
                 closure, last_child_result, err = recurser[op](stack, closure, last_child_result)
             else
                 closure, last_child_result, err = recurse_others(stack, closure, last_child_result)
+            end
+            
+            -- if the result is nil then return the specified null value
+            if last_child_result == nil then
+                last_child_result = opts.null()
             end
         end
     end
