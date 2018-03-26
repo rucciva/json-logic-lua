@@ -20,8 +20,8 @@ local function string_ends(String, End)
     return End == '' or string.sub(String, -string.len(End)) == End
 end
 
-local function is_logic(tab, opts)
-    local is_object = type(tab) == 'table' and tab ~= nil and opts.is_array(tab) == false
+local function is_logic(closure, tab)
+    local is_object = type(tab) == 'table' and not closure.opts.is_nil(tab) and not closure.opts.is_array(tab)
     if is_object == false then
         return false
     end
@@ -1208,7 +1208,7 @@ function JsonLogic.apply(logic, data, opts)
             end
 
             -- You've recursed to a primitive, stop!
-            if not is_logic(closure.logic, opts) then
+            if not is_logic(closure, closure.logic) then
                 last_child_result = closure.logic
                 closure = table.remove(stack)
                 break
