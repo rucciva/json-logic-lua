@@ -2262,3 +2262,30 @@ describe("json-logic custom nil value", function ()
         end)
     end)
 end)
+
+describe("json-logic nested operations", function ()
+    local function logic_test(test_table)
+        for i, t in ipairs(test_table) do
+            local res = logic_apply(t.logic, t.data, {custom_operations = t.op})
+            assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+        end
+    end
+    describe("given nested custom operations", function ()
+        it("should invoke the right operations", function ()
+            local test_table = {
+                {
+                    logic = {["req.get_method"] = {}},
+                    op = {
+                        req = {
+                            get_method = function()
+                                return "GET"
+                            end
+                        }
+                    },
+                    expected = "GET",
+                }
+            }
+            logic_test(test_table)
+        end)
+    end)
+end)
