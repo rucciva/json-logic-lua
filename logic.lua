@@ -380,7 +380,7 @@ operations['merge'] = function(closure, ...)
 end
 
 operations['var'] = function(closure, attr, default)
-    local data = closure.data    
+    local data = closure.data
     if closure.opts.is_nil(attr) or attr == '' then
         return data
     end
@@ -483,10 +483,10 @@ local function get_operator(tab)
     return nil
 end
 
-local function table_copy_zeroed(source, opts)
+local function table_copy_fill(source, opts)
     local target = {}
     for i, _ in pairs(source) do
-        target[i] = 0
+        target[i] = opts.null() or true
     end
     if opts.is_array(source) then
         opts.mark_as_array(target)
@@ -504,7 +504,7 @@ function recurse_array(stack, closure, last_child_result)
     closure.state.length = closure.state.length or #closure.logic
     closure.state.index = closure.state.index or 1
     closure.state.recursed = closure.state.recursed or {}
-    closure.state.normalized = closure.state.normalized or table_copy_zeroed(closure.logic, closure.opts)
+    closure.state.normalized = closure.state.normalized or table_copy_fill(closure.logic, closure.opts)
     --
 
     -- recurse if necessary
@@ -625,7 +625,10 @@ recurser['and'] =
     closure.state.normalized[op][closure.state.index] = last_child_result
     --
 
-    if js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) and closure.state.index < closure.state.length then
+    if
+        js_to_boolean(closure, closure.state.normalized[op][closure.state.index]) and
+            closure.state.index < closure.state.length
+     then
         -- closure condition is true
         closure.state.index = closure.state.index + 1
     else
@@ -638,7 +641,7 @@ recurser['and'] =
 end
 
 recurser['or'] =
-    function(stack, closure, last_child_result, opts)
+    function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -764,7 +767,7 @@ recurser['map'] =
     closure.state.recursed = closure.state.recursed or false
     closure.state.scoped = closure.state.scoped or false
     closure.state.mapped = closure.state.mapped or {}
-    closure.state.result = closure.state.result or table_copy_zeroed(closure.logic[op], closure.opts)
+    closure.state.result = closure.state.result or table_copy_fill(closure.logic[op], closure.opts)
     closure.state.normalized[op] = closure.state.normalized[op] or closure.opts.array()
     --
 
@@ -1179,9 +1182,7 @@ function JsonLogic.apply(logic, data, opts)
         },
         opts = nil
     }
-    if type(opts) ~= 'table' or opts == nil then
-        opts = {}
-    end
+    opts = opts or nil
     if type(opts.is_array) ~= 'function' then
         opts.is_array = is_array
     end
@@ -1219,8 +1220,15 @@ function JsonLogic.apply(logic, data, opts)
             end
             --
 
-            -- check for blacklist or non-whitelisted operations
+            -- literal operator
             local op = get_operator(closure.logic)
+            if op == '_' then
+                last_child_result = closure.logic[op]
+                closure = table.remove(stack)
+                break
+            end
+
+            -- check for blacklist or non-whitelisted operations
             if type(closure.opts.blacklist) == 'table' and closure.opts.blacklist[op] then
                 return closure.logic, 'blacklisted operations'
             elseif type(closure.opts.whitelist) == 'table' and not closure.opts.whitelist[op] then
@@ -1235,7 +1243,7 @@ function JsonLogic.apply(logic, data, opts)
             else
                 closure, last_child_result, err = recurse_others(stack, closure, last_child_result)
             end
-            
+
             -- if the result is nil then return the specified null value
             if last_child_result == nil then
                 last_child_result = opts.null()

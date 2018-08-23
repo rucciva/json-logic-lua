@@ -521,11 +521,11 @@ describe(
                     function()
                         local test_table = {
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('%', array( {var = ''}, 2))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('%', array({var = ''}, 2))),
                                 expected = {1, 3, 5}
                             },
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('-', array( {var = ''}, 2))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('-', array({var = ''}, 2))),
                                 expected = {1, 3, 4, 5}
                             },
                             {
@@ -533,7 +533,7 @@ describe(
                                 expected = {1, 2, 3, 4, 5}
                             },
                             {
-                                params = array(array(), logic.new_logic('-', array( {var = ''}, 2))),
+                                params = array(array(), logic.new_logic('-', array({var = ''}, 2))),
                                 expected = {}
                             },
                             {
@@ -576,19 +576,19 @@ describe(
                     function()
                         local test_table = {
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('*', array( {var = ''}, 2))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('*', array({var = ''}, 2))),
                                 expected = array(2, 4, 6, 8, 10)
                             },
                             {
-                                params = array({1, 2, 3, 4, 5}, logic.new_logic('*', array( {var = ''}, 2))),
+                                params = array({1, 2, 3, 4, 5}, logic.new_logic('*', array({var = ''}, 2))),
                                 expected = array(2, 4, 6, 8, 10)
                             },
                             {
-                                params = array(array(), logic.new_logic('*', array( {var = ''}, 2))),
+                                params = array(array(), logic.new_logic('*', array({var = ''}, 2))),
                                 expected = array()
                             },
                             {
-                                params = array(nil, logic.new_logic('*', array( {var = ''}, 2))),
+                                params = array(nil, logic.new_logic('*', array({var = ''}, 2))),
                                 expected = nil
                             },
                             {
@@ -623,21 +623,21 @@ describe(
                             {
                                 params = array(
                                     array(1, 2, 3, 4, 5),
-                                    logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'}))
+                                    logic.new_logic('+', array({var = 'current'}, {var = 'accumulator'}))
                                 ),
                                 expected = 15
                             },
                             {
                                 params = array(
                                     array(1, 2, 3, 4, 5),
-                                    logic.new_logic('*', array( {var = 'current'}, {var = 'accumulator'}))
+                                    logic.new_logic('*', array({var = 'current'}, {var = 'accumulator'}))
                                 ),
                                 expected = 120
                             },
                             {
                                 params = array(
                                     array(1, 2, 3, 4, 5),
-                                    logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'})),
+                                    logic.new_logic('+', array({var = 'current'}, {var = 'accumulator'})),
                                     10
                                 ),
                                 expected = 25
@@ -647,11 +647,17 @@ describe(
                                 expected = {}
                             },
                             {
-                                params = array(array(), logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'}))),
+                                params = array(
+                                    array(),
+                                    logic.new_logic('+', array({var = 'current'}, {var = 'accumulator'}))
+                                ),
                                 expected = nil
                             },
                             {
-                                params = array(nil, logic.new_logic('+', array( {var = 'current'}, {var = 'accumulator'}))),
+                                params = array(
+                                    nil,
+                                    logic.new_logic('+', array({var = 'current'}, {var = 'accumulator'}))
+                                ),
                                 expected = nil
                             },
                             {
@@ -659,7 +665,11 @@ describe(
                                 expected = nil
                             },
                             {
-                                params = array(nil, logic.new_logic('+', array({var = 'current'},{var = 'accumulator'})), 0),
+                                params = array(
+                                    nil,
+                                    logic.new_logic('+', array({var = 'current'}, {var = 'accumulator'})),
+                                    0
+                                ),
                                 expected = 0
                             }
                         }
@@ -688,14 +698,17 @@ describe(
                     function()
                         -- do test
                         local test_table = {
-                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array( {var = ''}, 0))), expected = true},
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array( {var = ''}, 2))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array({var = ''}, 0))),
+                                expected = true
+                            },
+                            {
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array({var = ''}, 2))),
                                 expected = false
                             },
                             {params = array(array(1, 2, 3, 4, 5), logic.new_logic()), expected = true},
-                            {params = array(array(), logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
-                            {params = array(nil, logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
+                            {params = array(array(), logic.new_logic('==', array({var = ''}, 2))), expected = nil},
+                            {params = array(nil, logic.new_logic('==', array({var = ''}, 2))), expected = nil},
                             {params = array(nil, nil), expected = nil}
                         }
                         logic_test(test_table)
@@ -722,18 +735,21 @@ describe(
                     function()
                         -- do test
                         local test_table = {
-                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array( {var = ''}, 0))), expected = true},
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', array( {var = ''}, 0))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array({var = ''}, 0))),
+                                expected = true
+                            },
+                            {
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', array({var = ''}, 0))),
                                 expected = false
                             },
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array( {var = ''}, 2))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array({var = ''}, 2))),
                                 expected = true
                             },
                             {params = array(array(1, 2, 3, 4, 5), logic.new_logic()), expected = true},
-                            {params = array(array(), logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
-                            {params = array(nil, logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
+                            {params = array(array(), logic.new_logic('==', array({var = ''}, 2))), expected = nil},
+                            {params = array(nil, logic.new_logic('==', array({var = ''}, 2))), expected = nil},
                             {params = array(nil, nil), expected = nil}
                         }
                         logic_test(test_table)
@@ -762,17 +778,20 @@ describe(
                         -- do test
                         local test_table = {
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array( {var = ''}, 0))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('>', array({var = ''}, 0))),
                                 expected = false
                             },
-                            {params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', array( {var = ''}, 0))), expected = true},
                             {
-                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array( {var = ''}, 2))),
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('<', array({var = ''}, 0))),
+                                expected = true
+                            },
+                            {
+                                params = array(array(1, 2, 3, 4, 5), logic.new_logic('==', array({var = ''}, 2))),
                                 expected = false
                             },
                             {params = array(array(1, 2, 3, 4, 5), logic.new_logic()), expected = false},
-                            {params = array(array(), logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
-                            {params = array(nil, logic.new_logic('==', array( {var = ''}, 2))), expected = nil},
+                            {params = array(array(), logic.new_logic('==', array({var = ''}, 2))), expected = nil},
+                            {params = array(nil, logic.new_logic('==', array({var = ''}, 2))), expected = nil},
                             {params = array(nil, nil), expected = nil}
                         }
                         logic_test(test_table)
@@ -978,7 +997,7 @@ describe(
                             {params = array('jsonlogic', 1, 10), expected = 'sonlogic'},
                             {params = array('jsonlogic', 4, -2), expected = 'log'},
                             {params = array('jsonlogic', 5, -6), expected = ''},
-                            {params = array('jsonlogic', 4, -20), expected = ''},
+                            {params = array('jsonlogic', 4, -20), expected = ''}
                         }
                         logic_test(test_table)
                     end
@@ -1004,1288 +1023,1473 @@ describe(
                     'should join all the elements separated by separator into strings',
                     function()
                         local test_table = {
-                            {params = array(",", array('')), expected = ""},
-                            {params = array(",", array('Fire')), expected = "Fire"},
-                            {params = array(",", array('Fire', 'Wind', 'Rain')), expected = "Fire,Wind,Rain"},
-                            {params = array(",", array(1, 2, 3)), expected = "1,2,3"},
-                            {params = array("-", array('Fire', 'Wind', 'Rain')), expected = "Fire-Wind-Rain"},
-                            {params = array("-", array(1, 2, 3)), expected = "1-2-3"},
-                            {params = array("-", array(1, 2, 3, array(4,5,6), 7, 8)), expected = "1-2-3-4,5,6-7-8"},
-                            {params = array("-", array(1, 2, 3, array(4,5,6,array(7,8,9),10,11))), expected = "1-2-3-4,5,6,7,8,9,10,11"},
-                            {params = array("-", array(1, 2, 3, array(4,5,6,array(7,8,9, array(10,11))),12,13)), expected = "1-2-3-4,5,6,7,8,9,10,11-12-13"},
-                            {params = array("", array('Fire', 'Wind', 'Rain')), expected = "Fire,Wind,Rain"},
-                            {params = array(nil, array('Fire', 'Wind', 'Rain')), expected = "Fire,Wind,Rain"},
-                            {params = array(array(1,2,3), array(1, 2, 3)), expected = "11,2,321,2,33"},
-                            {params = array(array("a",array("m","n","o"),"z"), array(1, 2, 3)), expected = "1a,m,n,o,z2a,m,n,o,z3"},
+                            {params = array(',', array('')), expected = ''},
+                            {params = array(',', array('Fire')), expected = 'Fire'},
+                            {params = array(',', array('Fire', 'Wind', 'Rain')), expected = 'Fire,Wind,Rain'},
+                            {params = array(',', array(1, 2, 3)), expected = '1,2,3'},
+                            {params = array('-', array('Fire', 'Wind', 'Rain')), expected = 'Fire-Wind-Rain'},
+                            {params = array('-', array(1, 2, 3)), expected = '1-2-3'},
+                            {params = array('-', array(1, 2, 3, array(4, 5, 6), 7, 8)), expected = '1-2-3-4,5,6-7-8'},
+                            {
+                                params = array('-', array(1, 2, 3, array(4, 5, 6, array(7, 8, 9), 10, 11))),
+                                expected = '1-2-3-4,5,6,7,8,9,10,11'
+                            },
+                            {
+                                params = array(
+                                    '-',
+                                    array(1, 2, 3, array(4, 5, 6, array(7, 8, 9, array(10, 11))), 12, 13)
+                                ),
+                                expected = '1-2-3-4,5,6,7,8,9,10,11-12-13'
+                            },
+                            {params = array('', array('Fire', 'Wind', 'Rain')), expected = 'Fire,Wind,Rain'},
+                            {params = array(nil, array('Fire', 'Wind', 'Rain')), expected = 'Fire,Wind,Rain'},
+                            {params = array(array(1, 2, 3), array(1, 2, 3)), expected = '11,2,321,2,33'},
+                            {
+                                params = array(array('a', array('m', 'n', 'o'), 'z'), array(1, 2, 3)),
+                                expected = '1a,m,n,o,z2a,m,n,o,z3'
+                            }
                         }
                         logic_test(test_table)
                     end
                 )
             end
         )
-        describe("given non array", function ()
-            it("should return nil", function ()
-                local test_table = {
-                    {params = array(",", 1), expected = nil},
-                    {params = array(",", "{1,2,3}"), expected = nil},
-                    {params = array(",", {1,2,3}), expected = nil},
-                    {params = array(",", true), expected = nil},
-                    {params = array(","), expected = nil},
-                    {params = array(), expected = nil},
-                }
-                logic_test(test_table)
-            end)
-        end)
+        describe(
+            'given non array',
+            function()
+                it(
+                    'should return nil',
+                    function()
+                        local test_table = {
+                            {params = array(',', 1), expected = nil},
+                            {params = array(',', '{1,2,3}'), expected = nil},
+                            {params = array(',', {1, 2, 3}), expected = nil},
+                            {params = array(',', true), expected = nil},
+                            {params = array(','), expected = nil},
+                            {params = array(), expected = nil}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
     end
 )
 
-describe("json-logic 'length' test", function ()
-    local function logic_test(test_table)
-        for i, t in ipairs(test_table) do
-            local res = logic_apply({length = t.params}, t.data)
-            assert.message('failed at index: ' .. i).are.equal(t.expected, res)
-        end
-    end
-    describe("given table", function ()
-        it("should return number of element in the table", function ()
-            local test_table = {
-                {params = array({}), expected = 0},
-                {params = array({1,2,3,4,5}), expected = 5},
-                {params = array({1,2,3,4,5,{1,2,3,4,5}}), expected = 6},
-                {params = array(array()), expected = 0},
-                {params = array(array(1,2,3,4,5, array(1,2,3,4,5))), expected = 6},
-            }
-            logic_test(test_table)
-        end)
-    end)
-    describe("given string", function ()
-        it("should return the length of the string", function ()
-            local test_table = {
-                {params = array(""), expected = 0},
-                {params = array("12345"), expected = 5},
-                {params = array("1234567890"), expected = 10},
-                {params = "", expected = 0},
-                {params = "12345", expected = 5},
-                {params = "1234567890", expected = 10},
-            }
-            logic_test(test_table)
-        end)
-    end)
-    describe("given parameters other than table and string", function ()
-        it("should return 0", function ()
-            local test_table = {
-                {params = array(1), expected = 0},
-                {params = array(true), expected = 0},
-                {params = 1, expected = 0},
-                {params = true, expected = 0},
-            }
-            logic_test(test_table)
-        end)
-    end)
-end)
-
-describe("json-logic number test", function ()
-    local function logic_test( test_table)
-        for i, t in ipairs(test_table) do
-            local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
-            if t.expected ~= t.expected and res ~= res then
-                -- test nan
-            else
+describe(
+    "json-logic 'length' test",
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply({length = t.params}, t.data)
                 assert.message('failed at index: ' .. i).are.equal(t.expected, res)
             end
         end
-    end
-    describe("given two or more numbers", function ()
-        it("should do the math :)", function ()
-            local test_table = {
-                {operator = "+", params = array(4,2,3), expected = 9},
-                {operator = "-", params = array(4,2), expected = 2},
-                {operator = "*", params = array(4,2), expected = 8},
-                {operator = "/", params = array(4,2), expected = 2},
-                {operator = "*", params = array(2,2,2,2,2), expected = 32},
-                {operator = "%", params = array(101,2), expected = 1},
-                {operator = ">", params = array(2,1), expected = true},
-                {operator = ">", params = array(3,4), expected = false},
-                {operator = ">=", params = array(1,1), expected = true},
-                {operator = ">=", params = array(-1,1), expected = false},
-                {operator = "<", params = array(1,2), expected = true},
-                {operator = "<", params = array(3,2), expected = false},
-                {operator = "<=", params = array(1,1), expected = true},
-                {operator = "<=", params = array(10,1), expected = false},
-                {operator = "<", params = array(1,2,3), expected = true},
-                {operator = "<", params = array(1,2,1), expected = false},
-                {operator = "<", params = array(1,4,3), expected = false},
-                {operator = "<", params = array(1,1,3), expected = false},
-                {operator = "<=", params = array(1,2,3), expected = true},
-                {operator = "<=", params = array(1,1,3), expected = true},
-                {operator = "<=", params = array(1,4,3), expected = false},
-                {operator = "-", params = array(-2), expected = 2},
-                {operator = "-", params = array(2), expected = -2},
-                {operator = "max", params = array(1,10,3), expected = 10},
-                {operator = "min", params = array(-1,15,10), expected = -1},
-            }
-            logic_test(test_table)
-        end)
-    end)
-    describe("given two or more convertible non numbers", function ()
-        it("should convert it to numbers and do the math", function ()
-            local test_table = {
-                {operator = "+", params = array("3.14"), expected = 3.14},
-                {operator = "+", params = array(4,2,"1",3,5), expected = 15},
-                {operator = "+", params = array(array(4),"2"), expected = 6},
-                {operator = "+", params = array("2"), expected = 2},
-                {operator = "-", params = array(array("2")), expected = -2},
-                {operator = "-", params = array(array("2") , array(1)), expected = 1},
-                {operator = "*", params = array(2,array(2),"2",array("2"),array(array(2))), expected = 32},
-                {operator = "/", params = array(array("4"),2), expected = 2},
-                {operator = "%", params = array(array(101),"2"), expected = 1},
-                {operator = ">", params = array("2",array(1)), expected = true},
-                {operator = ">", params = array("3","4"), expected = false},
-                {operator = ">=", params = array(array(1),array()), expected = true},
-                {operator = ">=", params = array("-1",1), expected = false},
-                {operator = "<", params = array(array(1),"2"), expected = true},
-                {operator = "<", params = array("3",array(array(2))), expected = false},
-                {operator = "<=", params = array(array(1),array(1)), expected = true},
-                {operator = "<=", params = array("10","1"), expected = false},
-                {operator = "<", params = array("1","2",array("3")), expected = true},
-                {operator = "<", params = array(array(1),"2",array(1)), expected = false},
-                {operator = "<", params = array("1",4,array("3")), expected = false},
-                {operator = "<", params = array(1,"1",3), expected = false},
-                {operator = "<=", params = array(array(array(1)),2,"3"), expected = true},
-                {operator = "<=", params = array(1,array(array("1")),3), expected = true},
-                {operator = "<=", params = array(1,array(array(4)),3), expected = false},
-                {operator = "min", params = array(array(1),array(10),3), expected = 1},
-                {operator = "max", params = array(array(1),array(10),3), expected = 10},
-                {operator = "min", params = array(array(1),array(array(10)),3), expected = 1},
-                {operator = "max", params = array(array(1),array(array(10)),3), expected = 10}
-            }
-            logic_test(test_table)
-        end)
-    end)
-    describe("given parameters that includes number-inconvertible data", function ()
-        it("should return false when operator is comparison", function ()
-            local test_table = {
-                {operator = "<", params = array(4,{test = "test"},"1"), expected = false},
-                {operator = "<=", params = array(4,{test = "test"},"1"), expected = false},
-                {operator = ">", params = array(4,{test = "test"}), expected = false},
-                {operator = ">=", params = array(4,{test = "test"}), expected = false},
-            }
-            logic_test(test_table)
-        end)
-        it("should return string when operator is '+'", function ()
-            local test_table = {
-                {operator = "+", params = array(4,{2},"3"), expected = "4[object Object]3"},
-                {operator = "+", params = array(4,{test = "test"},"1"), expected = "4[object Object]1"},
-                {operator = "+", params = array("4",1,1), expected = "411"},
-                {operator = "+", params = array("4",array()), expected = "4"},
-            }
-            logic_test(test_table)
-        end)
-        it("should return nan when operator is '+' but arguments is 1", function ()
-            local test_table = {
-                {operator = "-", params = array({test = "test"}), expected = 0/0},
-                {operator = "-", params = array({3}), expected = 0/0},
-                {operator = "-", params = array(function()end), expected = 0/0},
-            }
-            logic_test(test_table)
-        end)
-        it("should return nan when operator for other aritmethic", function ()
-            local test_table = {
-                {operator = "-", params = array(4,{test = "test"},"1"), expected = 0/0},
-                {operator = "*", params = array(4,{test = "test"},"1"), expected = 0/0},
-                {operator = "/", params = array(4,{test = "test"},"1"), expected = 0/0},
-                {operator = "%", params = array(4,{test = "test"},"1"), expected = 0/0},
-            }
-            logic_test(test_table)
-        end)
-    end)
-end)
-
-describe("json-logic equality test", function ()
-    local function logic_test( test_table)
-        for i, t in ipairs(test_table) do
-            local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
-            assert.message('failed at index: ' .. i).are.equal(t.expected, res)
-        end
-    end
-    describe("given two items", function ()
-        it("should return result of loose equality evaluation when using '==' operator", function ()
-            local test_table = {
-                {operator = "==" , params = array(true, true), expected = true},
-                {operator = "==" , params = array(true, false), expected = false},
-                {operator = "==" , params = array(true, 1), expected = true},
-                {operator = "==" , params = array(true, 0), expected = false},
-                {operator = "==" , params = array(true, -1), expected = false},
-                {operator = "==" , params = array(true, "true"), expected =false },
-                {operator = "==" , params = array(true, "false"), expected =false },
-                {operator = "==" , params = array(true, "1"), expected = true},
-                {operator = "==" , params = array(true, "0"), expected = false},
-                {operator = "==" , params = array(true, "-1"), expected = false},
-                {operator = "==" , params = array(true, ""), expected = false},
-                {operator = "==" , params = array(true, nil), expected = false},
-                {operator = "==" , params = array(true, undefined), expected = false},
-                {operator = "==" , params = array(true, 1/0), expected = false},
-                {operator = "==" , params = array(true, -1/0), expected = false},
-                {operator = "==" , params = array(true, array()), expected = false},
-                {operator = "==" , params = array(true, {}), expected = false},
-                {operator = "==" , params = array(true, array(array())), expected = false},
-                {operator = "==" , params = array(true, array(0)), expected = false},
-                {operator = "==" , params = array(true, array(1)), expected = true},
-                {operator = "==" , params = array(true, 0/0), expected = false},
-                {operator = "==" , params = array(false, true), expected = false},
-                {operator = "==" , params = array(false, false), expected = true},
-                {operator = "==" , params = array(false, 1), expected = false},
-                {operator = "==" , params = array(false, 0), expected = true},
-                {operator = "==" , params = array(false, -1), expected = false},
-                {operator = "==" , params = array(false, "true"), expected =false },
-                {operator = "==" , params = array(false, "false"), expected =false },
-                {operator = "==" , params = array(false, "1"), expected = false},
-                {operator = "==" , params = array(false, "0"), expected = true},
-                {operator = "==" , params = array(false, "-1"), expected = false},
-                {operator = "==" , params = array(false, ""), expected = true},
-                {operator = "==" , params = array(false, nil), expected = false},
-                {operator = "==" , params = array(false, undefined), expected = false},
-                {operator = "==" , params = array(false, 1/0), expected = false},
-                {operator = "==" , params = array(false, -1/0), expected = false},
-                {operator = "==" , params = array(false, array()), expected = true},
-                {operator = "==" , params = array(false, {}), expected = false},
-                {operator = "==" , params = array(false, array(array())), expected = true},
-                {operator = "==" , params = array(false, array(0)), expected = true},
-                {operator = "==" , params = array(false, array(1)), expected = false},
-                {operator = "==" , params = array(false, 0/0), expected = false},
-                {operator = "==" , params = array(1, true), expected = true},
-                {operator = "==" , params = array(1, false), expected = false},
-                {operator = "==" , params = array(1, 1), expected = true},
-                {operator = "==" , params = array(1, 0), expected = false},
-                {operator = "==" , params = array(1, -1), expected = false},
-                {operator = "==" , params = array(1, "true"), expected =false },
-                {operator = "==" , params = array(1, "false"), expected =false },
-                {operator = "==" , params = array(1, "1"), expected = true},
-                {operator = "==" , params = array(1, "0"), expected = false},
-                {operator = "==" , params = array(1, "-1"), expected = false},
-                {operator = "==" , params = array(1, ""), expected = false},
-                {operator = "==" , params = array(1, nil), expected = false},
-                {operator = "==" , params = array(1, undefined), expected = false},
-                {operator = "==" , params = array(1, 1/0), expected = false},
-                {operator = "==" , params = array(1, -1/0), expected = false},
-                {operator = "==" , params = array(1, array()), expected = false},
-                {operator = "==" , params = array(1, {}), expected = false},
-                {operator = "==" , params = array(1, array(array())), expected = false},
-                {operator = "==" , params = array(1, array(0)), expected = false},
-                {operator = "==" , params = array(1, array(1)), expected = true},
-                {operator = "==" , params = array(1, 0/0), expected = false},
-                {operator = "==" , params = array(0, true), expected = false},
-                {operator = "==" , params = array(0, false), expected = true},
-                {operator = "==" , params = array(0, 1), expected = false},
-                {operator = "==" , params = array(0, 0), expected = true},
-                {operator = "==" , params = array(0, -1), expected = false},
-                {operator = "==" , params = array(0, "true"), expected =false },
-                {operator = "==" , params = array(0, "false"), expected =false },
-                {operator = "==" , params = array(0, "1"), expected = false},
-                {operator = "==" , params = array(0, "0"), expected = true},
-                {operator = "==" , params = array(0, "-1"), expected = false},
-                {operator = "==" , params = array(0, ""), expected = true},
-                {operator = "==" , params = array(0, nil), expected = false},
-                {operator = "==" , params = array(0, undefined), expected = false},
-                {operator = "==" , params = array(0, 1/0), expected = false},
-                {operator = "==" , params = array(0, -1/0), expected = false},
-                {operator = "==" , params = array(0, array()), expected = true},
-                {operator = "==" , params = array(0, {}), expected = false},
-                {operator = "==" , params = array(0, array(array())), expected = true},
-                {operator = "==" , params = array(0, array(0)), expected = true},
-                {operator = "==" , params = array(0, array(1)), expected = false},
-                {operator = "==" , params = array(0, 0/0), expected = false},
-                {operator = "==" , params = array(-1, true), expected = false},
-                {operator = "==" , params = array(-1, false), expected = false},
-                {operator = "==" , params = array(-1, 1), expected = false},
-                {operator = "==" , params = array(-1, 0), expected = false},
-                {operator = "==" , params = array(-1, -1), expected = true},
-                {operator = "==" , params = array(-1, "true"), expected =false },
-                {operator = "==" , params = array(-1, "false"), expected =false },
-                {operator = "==" , params = array(-1, "1"), expected = false},
-                {operator = "==" , params = array(-1, "0"), expected = false},
-                {operator = "==" , params = array(-1, "-1"), expected = true},
-                {operator = "==" , params = array(-1, ""), expected = false},
-                {operator = "==" , params = array(-1, nil), expected = false},
-                {operator = "==" , params = array(-1, undefined), expected = false},
-                {operator = "==" , params = array(-1, 1/0), expected = false},
-                {operator = "==" , params = array(-1, -1/0), expected = false},
-                {operator = "==" , params = array(-1, array()), expected = false},
-                {operator = "==" , params = array(-1, {}), expected = false},
-                {operator = "==" , params = array(-1, array(array())), expected = false},
-                {operator = "==" , params = array(-1, array(0)), expected = false},
-                {operator = "==" , params = array(-1, array(1)), expected = false},
-                {operator = "==" , params = array(-1, 0/0), expected = false},
-                {operator = "==" , params = array("true", true), expected = false},
-                {operator = "==" , params = array("true", false), expected = false},
-                {operator = "==" , params = array("true", 1), expected = false},
-                {operator = "==" , params = array("true", 0), expected = false},
-                {operator = "==" , params = array("true", -1), expected = false},
-                {operator = "==" , params = array("true", "true"), expected =true },
-                {operator = "==" , params = array("true", "false"), expected =false },
-                {operator = "==" , params = array("true", "1"), expected = false},
-                {operator = "==" , params = array("true", "0"), expected = false},
-                {operator = "==" , params = array("true", "-1"), expected = false},
-                {operator = "==" , params = array("true", ""), expected = false},
-                {operator = "==" , params = array("true", nil), expected = false},
-                {operator = "==" , params = array("true", undefined), expected = false},
-                {operator = "==" , params = array("true", 1/0), expected = false},
-                {operator = "==" , params = array("true", -1/0), expected = false},
-                {operator = "==" , params = array("true", array()), expected = false},
-                {operator = "==" , params = array("true", {}), expected = false},
-                {operator = "==" , params = array("true", array(array())), expected = false},
-                {operator = "==" , params = array("true", array(0)), expected = false},
-                {operator = "==" , params = array("true", array(1)), expected = false},
-                {operator = "==" , params = array("true", 0/0), expected = false},
-                {operator = "==" , params = array("false", true), expected = false},
-                {operator = "==" , params = array("false", false), expected = false},
-                {operator = "==" , params = array("false", 1), expected = false},
-                {operator = "==" , params = array("false", 0), expected = false},
-                {operator = "==" , params = array("false", -1), expected = false},
-                {operator = "==" , params = array("false", "true"), expected =false },
-                {operator = "==" , params = array("false", "false"), expected =true },
-                {operator = "==" , params = array("false", "1"), expected = false},
-                {operator = "==" , params = array("false", "0"), expected = false},
-                {operator = "==" , params = array("false", "-1"), expected = false},
-                {operator = "==" , params = array("false", ""), expected = false},
-                {operator = "==" , params = array("false", nil), expected = false},
-                {operator = "==" , params = array("false", undefined), expected = false},
-                {operator = "==" , params = array("false", 1/0), expected = false},
-                {operator = "==" , params = array("false", -1/0), expected = false},
-                {operator = "==" , params = array("false", array()), expected = false},
-                {operator = "==" , params = array("false", {}), expected = false},
-                {operator = "==" , params = array("false", array(array())), expected = false},
-                {operator = "==" , params = array("false", array(0)), expected = false},
-                {operator = "==" , params = array("false", array(1)), expected = false},
-                {operator = "==" , params = array("false", 0/0), expected = false},
-                {operator = "==" , params = array("1", true), expected = true},
-                {operator = "==" , params = array("1", false), expected = false},
-                {operator = "==" , params = array("1", 1), expected = true},
-                {operator = "==" , params = array("1", 0), expected = false},
-                {operator = "==" , params = array("1", -1), expected = false},
-                {operator = "==" , params = array("1", "true"), expected =false },
-                {operator = "==" , params = array("1", "false"), expected =false },
-                {operator = "==" , params = array("1", "1"), expected = true},
-                {operator = "==" , params = array("1", "0"), expected = false},
-                {operator = "==" , params = array("1", "-1"), expected = false},
-                {operator = "==" , params = array("1", ""), expected = false},
-                {operator = "==" , params = array("1", nil), expected = false},
-                {operator = "==" , params = array("1", undefined), expected = false},
-                {operator = "==" , params = array("1", 1/0), expected = false},
-                {operator = "==" , params = array("1", -1/0), expected = false},
-                {operator = "==" , params = array("1", array()), expected = false},
-                {operator = "==" , params = array("1", {}), expected = false},
-                {operator = "==" , params = array("1", array(array())), expected = false},
-                {operator = "==" , params = array("1", array(0)), expected = false},
-                {operator = "==" , params = array("1", array(1)), expected = true},
-                {operator = "==" , params = array("1", 0/0), expected = false},
-                {operator = "==" , params = array("0", true), expected = false},
-                {operator = "==" , params = array("0", false), expected = true},
-                {operator = "==" , params = array("0", 1), expected = false},
-                {operator = "==" , params = array("0", 0), expected = true},
-                {operator = "==" , params = array("0", -1), expected = false},
-                {operator = "==" , params = array("0", "true"), expected =false },
-                {operator = "==" , params = array("0", "false"), expected =false },
-                {operator = "==" , params = array("0", "1"), expected = false},
-                {operator = "==" , params = array("0", "0"), expected = true},
-                {operator = "==" , params = array("0", "-1"), expected = false},
-                {operator = "==" , params = array("0", ""), expected = false},
-                {operator = "==" , params = array("0", nil), expected = false},
-                {operator = "==" , params = array("0", undefined), expected = false},
-                {operator = "==" , params = array("0", 1/0), expected = false},
-                {operator = "==" , params = array("0", -1/0), expected = false},
-                {operator = "==" , params = array("0", array()), expected = false},
-                {operator = "==" , params = array("0", {}), expected = false},
-                {operator = "==" , params = array("0", array(array())), expected = false},
-                {operator = "==" , params = array("0", array(0)), expected = true},
-                {operator = "==" , params = array("0", array(1)), expected = false},
-                {operator = "==" , params = array("0", 0/0), expected = false},
-                {operator = "==" , params = array("-1", true), expected = false},
-                {operator = "==" , params = array("-1", false), expected = false},
-                {operator = "==" , params = array("-1", 1), expected = false},
-                {operator = "==" , params = array("-1", 0), expected = false},
-                {operator = "==" , params = array("-1", -1), expected = true},
-                {operator = "==" , params = array("-1", "true"), expected =false },
-                {operator = "==" , params = array("-1", "false"), expected =false },
-                {operator = "==" , params = array("-1", "1"), expected = false},
-                {operator = "==" , params = array("-1", "0"), expected = false},
-                {operator = "==" , params = array("-1", "-1"), expected = true},
-                {operator = "==" , params = array("-1", ""), expected = false},
-                {operator = "==" , params = array("-1", nil), expected = false},
-                {operator = "==" , params = array("-1", undefined), expected = false},
-                {operator = "==" , params = array("-1", 1/0), expected = false},
-                {operator = "==" , params = array("-1", -1/0), expected = false},
-                {operator = "==" , params = array("-1", array()), expected = false},
-                {operator = "==" , params = array("-1", {}), expected = false},
-                {operator = "==" , params = array("-1", array(array())), expected = false},
-                {operator = "==" , params = array("-1", array(0)), expected = false},
-                {operator = "==" , params = array("-1", array(1)), expected = false},
-                {operator = "==" , params = array("-1", 0/0), expected = false},
-                {operator = "==" , params = array("", true), expected = false},
-                {operator = "==" , params = array("", false), expected = true},
-                {operator = "==" , params = array("", 1), expected = false},
-                {operator = "==" , params = array("", 0), expected = true},
-                {operator = "==" , params = array("", -1), expected = false},
-                {operator = "==" , params = array("", "true"), expected =false },
-                {operator = "==" , params = array("", "false"), expected =false },
-                {operator = "==" , params = array("", "1"), expected = false},
-                {operator = "==" , params = array("", "0"), expected = false},
-                {operator = "==" , params = array("", "-1"), expected = false},
-                {operator = "==" , params = array("", ""), expected = true},
-                {operator = "==" , params = array("", nil), expected = false},
-                {operator = "==" , params = array("", undefined), expected = false},
-                {operator = "==" , params = array("", 1/0), expected = false},
-                {operator = "==" , params = array("", -1/0), expected = false},
-                {operator = "==" , params = array("", array()), expected = true},
-                {operator = "==" , params = array("", {}), expected = false},
-                {operator = "==" , params = array("", array(array())), expected = true},
-                {operator = "==" , params = array("", array(0)), expected = false},
-                {operator = "==" , params = array("", array(1)), expected = false},
-                {operator = "==" , params = array("", 0/0), expected = false},
-                {operator = "==" , params = array(nil, true), expected = false},
-                {operator = "==" , params = array(nil, false), expected = false},
-                {operator = "==" , params = array(nil, 1), expected = false},
-                {operator = "==" , params = array(nil, 0), expected = false},
-                {operator = "==" , params = array(nil, -1), expected = false},
-                {operator = "==" , params = array(nil, "true"), expected =false },
-                {operator = "==" , params = array(nil, "false"), expected =false },
-                {operator = "==" , params = array(nil, "1"), expected = false},
-                {operator = "==" , params = array(nil, "0"), expected = false},
-                {operator = "==" , params = array(nil, "-1"), expected = false},
-                {operator = "==" , params = array(nil, ""), expected = false},
-                {operator = "==" , params = array(nil, nil), expected = true},
-                {operator = "==" , params = array(nil, undefined), expected = true},
-                {operator = "==" , params = array(nil, 1/0), expected = false},
-                {operator = "==" , params = array(nil, -1/0), expected = false},
-                {operator = "==" , params = array(nil, array()), expected = false},
-                {operator = "==" , params = array(nil, {}), expected = false},
-                {operator = "==" , params = array(nil, array(array())), expected = false},
-                {operator = "==" , params = array(nil, array(0)), expected = false},
-                {operator = "==" , params = array(nil, array(1)), expected = false},
-                {operator = "==" , params = array(nil, 0/0), expected = false},
-                {operator = "==" , params = array(undefined, true), expected = false},
-                {operator = "==" , params = array(undefined, false), expected = false},
-                {operator = "==" , params = array(undefined, 1), expected = false},
-                {operator = "==" , params = array(undefined, 0), expected = false},
-                {operator = "==" , params = array(undefined, -1), expected = false},
-                {operator = "==" , params = array(undefined, "true"), expected =false },
-                {operator = "==" , params = array(undefined, "false"), expected =false },
-                {operator = "==" , params = array(undefined, "1"), expected = false},
-                {operator = "==" , params = array(undefined, "0"), expected = false},
-                {operator = "==" , params = array(undefined, "-1"), expected = false},
-                {operator = "==" , params = array(undefined, ""), expected = false},
-                {operator = "==" , params = array(undefined, nil), expected = true},
-                {operator = "==" , params = array(undefined, undefined), expected = true},
-                {operator = "==" , params = array(undefined, 1/0), expected = false},
-                {operator = "==" , params = array(undefined, -1/0), expected = false},
-                {operator = "==" , params = array(undefined, array()), expected = false},
-                {operator = "==" , params = array(undefined, {}), expected = false},
-                {operator = "==" , params = array(undefined, array(array())), expected = false},
-                {operator = "==" , params = array(undefined, array(0)), expected = false},
-                {operator = "==" , params = array(undefined, array(1)), expected = false},
-                {operator = "==" , params = array(undefined, 0/0), expected = false},
-                {operator = "==" , params = array(1/0, true), expected = false},
-                {operator = "==" , params = array(1/0, false), expected = false},
-                {operator = "==" , params = array(1/0, 1), expected = false},
-                {operator = "==" , params = array(1/0, 0), expected = false},
-                {operator = "==" , params = array(1/0, -1), expected = false},
-                {operator = "==" , params = array(1/0, "true"), expected =false },
-                {operator = "==" , params = array(1/0, "false"), expected =false },
-                {operator = "==" , params = array(1/0, "1"), expected = false},
-                {operator = "==" , params = array(1/0, "0"), expected = false},
-                {operator = "==" , params = array(1/0, "-1"), expected = false},
-                {operator = "==" , params = array(1/0, ""), expected = false},
-                {operator = "==" , params = array(1/0, nil), expected = false},
-                {operator = "==" , params = array(1/0, undefined), expected = false},
-                {operator = "==" , params = array(1/0, 1/0), expected = true},
-                {operator = "==" , params = array(1/0, -1/0), expected = false},
-                {operator = "==" , params = array(1/0, array()), expected = false},
-                {operator = "==" , params = array(1/0, {}), expected = false},
-                {operator = "==" , params = array(1/0, array(array())), expected = false},
-                {operator = "==" , params = array(1/0, array(0)), expected = false},
-                {operator = "==" , params = array(1/0, array(1)), expected = false},
-                {operator = "==" , params = array(1/0, 0/0), expected = false},
-                {operator = "==" , params = array(-1/0, true), expected = false},
-                {operator = "==" , params = array(-1/0, false), expected = false},
-                {operator = "==" , params = array(-1/0, 1), expected = false},
-                {operator = "==" , params = array(-1/0, 0), expected = false},
-                {operator = "==" , params = array(-1/0, -1), expected = false},
-                {operator = "==" , params = array(-1/0, "true"), expected =false },
-                {operator = "==" , params = array(-1/0, "false"), expected =false },
-                {operator = "==" , params = array(-1/0, "1"), expected = false},
-                {operator = "==" , params = array(-1/0, "0"), expected = false},
-                {operator = "==" , params = array(-1/0, "-1"), expected = false},
-                {operator = "==" , params = array(-1/0, ""), expected = false},
-                {operator = "==" , params = array(-1/0, nil), expected = false},
-                {operator = "==" , params = array(-1/0, undefined), expected = false},
-                {operator = "==" , params = array(-1/0, 1/0), expected = false},
-                {operator = "==" , params = array(-1/0, -1/0), expected = true},
-                {operator = "==" , params = array(-1/0, array()), expected = false},
-                {operator = "==" , params = array(-1/0, {}), expected = false},
-                {operator = "==" , params = array(-1/0, array(array())), expected = false},
-                {operator = "==" , params = array(-1/0, array(0)), expected = false},
-                {operator = "==" , params = array(-1/0, array(1)), expected = false},
-                {operator = "==" , params = array(-1/0, 0/0), expected = false},
-                {operator = "==" , params = array(array(), true), expected = false},
-                {operator = "==" , params = array(array(), false), expected = true},
-                {operator = "==" , params = array(array(), 1), expected = false},
-                {operator = "==" , params = array(array(), 0), expected = true},
-                {operator = "==" , params = array(array(), -1), expected = false},
-                {operator = "==" , params = array(array(), "true"), expected =false },
-                {operator = "==" , params = array(array(), "false"), expected =false },
-                {operator = "==" , params = array(array(), "1"), expected = false},
-                {operator = "==" , params = array(array(), "0"), expected = false},
-                {operator = "==" , params = array(array(), "-1"), expected = false},
-                {operator = "==" , params = array(array(), ""), expected = true},
-                {operator = "==" , params = array(array(), nil), expected = false},
-                {operator = "==" , params = array(array(), undefined), expected = false},
-                {operator = "==" , params = array(array(), 1/0), expected = false},
-                {operator = "==" , params = array(array(), -1/0), expected = false},
-                {operator = "==" , params = array(array(), array()), expected = false},
-                {operator = "==" , params = array(array(), {}), expected = false},
-                {operator = "==" , params = array(array(), array(array())), expected = false},
-                {operator = "==" , params = array(array(), array(0)), expected = false},
-                {operator = "==" , params = array(array(), array(1)), expected = false},
-                {operator = "==" , params = array(array(), 0/0), expected = false},
-                {operator = "==" , params = array({}, true), expected = false},
-                {operator = "==" , params = array({}, false), expected = false},
-                {operator = "==" , params = array({}, 1), expected = false},
-                {operator = "==" , params = array({}, 0), expected = false},
-                {operator = "==" , params = array({}, -1), expected = false},
-                {operator = "==" , params = array({}, "true"), expected =false },
-                {operator = "==" , params = array({}, "false"), expected =false },
-                {operator = "==" , params = array({}, "1"), expected = false},
-                {operator = "==" , params = array({}, "0"), expected = false},
-                {operator = "==" , params = array({}, "-1"), expected = false},
-                {operator = "==" , params = array({}, ""), expected = false},
-                {operator = "==" , params = array({}, nil), expected = false},
-                {operator = "==" , params = array({}, undefined), expected = false},
-                {operator = "==" , params = array({}, 1/0), expected = false},
-                {operator = "==" , params = array({}, -1/0), expected = false},
-                {operator = "==" , params = array({}, array()), expected = false},
-                {operator = "==" , params = array({}, {}), expected = false},
-                {operator = "==" , params = array({}, array(array())), expected = false},
-                {operator = "==" , params = array({}, array(0)), expected = false},
-                {operator = "==" , params = array({}, array(1)), expected = false},
-                {operator = "==" , params = array({}, 0/0), expected = false},
-                {operator = "==" , params = array(array(array()), true), expected = false},
-                {operator = "==" , params = array(array(array()), false), expected = true},
-                {operator = "==" , params = array(array(array()), 1), expected = false},
-                {operator = "==" , params = array(array(array()), 0), expected = true},
-                {operator = "==" , params = array(array(array()), -1), expected = false},
-                {operator = "==" , params = array(array(array()), "true"), expected =false },
-                {operator = "==" , params = array(array(array()), "false"), expected =false },
-                {operator = "==" , params = array(array(array()), "1"), expected = false},
-                {operator = "==" , params = array(array(array()), "0"), expected = false},
-                {operator = "==" , params = array(array(array()), "-1"), expected = false},
-                {operator = "==" , params = array(array(array()), ""), expected = true},
-                {operator = "==" , params = array(array(array()), nil), expected = false},
-                {operator = "==" , params = array(array(array()), undefined), expected = false},
-                {operator = "==" , params = array(array(array()), 1/0), expected = false},
-                {operator = "==" , params = array(array(array()), -1/0), expected = false},
-                {operator = "==" , params = array(array(array()), array()), expected = false},
-                {operator = "==" , params = array(array(array()), {}), expected = false},
-                {operator = "==" , params = array(array(array()), array(array())), expected = false},
-                {operator = "==" , params = array(array(array()), array(0)), expected = false},
-                {operator = "==" , params = array(array(array()), array(1)), expected = false},
-                {operator = "==" , params = array(array(array()), 0/0), expected = false},
-                {operator = "==" , params = array(array(0), true), expected = false},
-                {operator = "==" , params = array(array(0), false), expected = true},
-                {operator = "==" , params = array(array(0), 1), expected = false},
-                {operator = "==" , params = array(array(0), 0), expected = true},
-                {operator = "==" , params = array(array(0), -1), expected = false},
-                {operator = "==" , params = array(array(0), "true"), expected =false },
-                {operator = "==" , params = array(array(0), "false"), expected =false },
-                {operator = "==" , params = array(array(0), "1"), expected = false},
-                {operator = "==" , params = array(array(0), "0"), expected = true},
-                {operator = "==" , params = array(array(0), "-1"), expected = false},
-                {operator = "==" , params = array(array(0), ""), expected = false},
-                {operator = "==" , params = array(array(0), nil), expected = false},
-                {operator = "==" , params = array(array(0), undefined), expected = false},
-                {operator = "==" , params = array(array(0), 1/0), expected = false},
-                {operator = "==" , params = array(array(0), -1/0), expected = false},
-                {operator = "==" , params = array(array(0), array()), expected = false},
-                {operator = "==" , params = array(array(0), {}), expected = false},
-                {operator = "==" , params = array(array(0), array(array())), expected = false},
-                {operator = "==" , params = array(array(0), array(0)), expected = false},
-                {operator = "==" , params = array(array(0), array(1)), expected = false},
-                {operator = "==" , params = array(array(0), 0/0), expected = false},
-                {operator = "==" , params = array(array(1), true), expected = true},
-                {operator = "==" , params = array(array(1), false), expected = false},
-                {operator = "==" , params = array(array(1), 1), expected = true},
-                {operator = "==" , params = array(array(1), 0), expected = false},
-                {operator = "==" , params = array(array(1), -1), expected = false},
-                {operator = "==" , params = array(array(1), "true"), expected =false },
-                {operator = "==" , params = array(array(1), "false"), expected =false },
-                {operator = "==" , params = array(array(1), "1"), expected = true},
-                {operator = "==" , params = array(array(1), "0"), expected = false},
-                {operator = "==" , params = array(array(1), "-1"), expected = false},
-                {operator = "==" , params = array(array(1), ""), expected = false},
-                {operator = "==" , params = array(array(1), nil), expected = false},
-                {operator = "==" , params = array(array(1), undefined), expected = false},
-                {operator = "==" , params = array(array(1), 1/0), expected = false},
-                {operator = "==" , params = array(array(1), -1/0), expected = false},
-                {operator = "==" , params = array(array(1), array()), expected = false},
-                {operator = "==" , params = array(array(1), {}), expected = false},
-                {operator = "==" , params = array(array(1), array(array())), expected = false},
-                {operator = "==" , params = array(array(1), array(0)), expected = false},
-                {operator = "==" , params = array(array(1), array(1)), expected = false},
-                {operator = "==" , params = array(array(1), 0/0), expected = false},
-                {operator = "==" , params = array(0/0, true), expected = false},
-                {operator = "==" , params = array(0/0, false), expected = false},
-                {operator = "==" , params = array(0/0, 1), expected = false},
-                {operator = "==" , params = array(0/0, 0), expected = false},
-                {operator = "==" , params = array(0/0, -1), expected = false},
-                {operator = "==" , params = array(0/0, "true"), expected =false },
-                {operator = "==" , params = array(0/0, "false"), expected =false },
-                {operator = "==" , params = array(0/0, "1"), expected = false},
-                {operator = "==" , params = array(0/0, "0"), expected = false},
-                {operator = "==" , params = array(0/0, "-1"), expected = false},
-                {operator = "==" , params = array(0/0, ""), expected = false},
-                {operator = "==" , params = array(0/0, nil), expected = false},
-                {operator = "==" , params = array(0/0, undefined), expected = false},
-                {operator = "==" , params = array(0/0, 1/0), expected = false},
-                {operator = "==" , params = array(0/0, -1/0), expected = false},
-                {operator = "==" , params = array(0/0, array()), expected = false},
-                {operator = "==" , params = array(0/0, {}), expected = false},
-                {operator = "==" , params = array(0/0, array(array())), expected = false},
-                {operator = "==" , params = array(0/0, array(0)), expected = false},
-                {operator = "==" , params = array(0/0, array(1)), expected = false},
-                {operator = "==" , params = array(0/0, 0/0), expected = false},
-            }
-            logic_test(test_table)
-        end)
-        it("should return result of loose inequality evaluation when using '!=' operator", function ()
-            local test_table = {
-                {operator = "!=" , params = array(true, true), expected = false},
-                {operator = "!=" , params = array(true, false), expected = true},
-                {operator = "!=" , params = array(true, 1), expected = false},
-                {operator = "!=" , params = array(true, 0), expected = true},
-                {operator = "!=" , params = array(true, -1), expected = true},
-                {operator = "!=" , params = array(true, "true"), expected = true },
-                {operator = "!=" , params = array(true, "false"), expected = true },
-                {operator = "!=" , params = array(true, "1"), expected = false},
-                {operator = "!=" , params = array(true, "0"), expected = true},
-                {operator = "!=" , params = array(true, "-1"), expected = true},
-                {operator = "!=" , params = array(true, ""), expected = true},
-                {operator = "!=" , params = array(true, nil), expected = true},
-                {operator = "!=" , params = array(true, undefined), expected = true},
-                {operator = "!=" , params = array(true, 1/0), expected = true},
-                {operator = "!=" , params = array(true, -1/0), expected = true},
-                {operator = "!=" , params = array(true, array()), expected = true},
-                {operator = "!=" , params = array(true, {}), expected = true},
-                {operator = "!=" , params = array(true, array(array())), expected = true},
-                {operator = "!=" , params = array(true, array(0)), expected = true},
-                {operator = "!=" , params = array(true, array(1)), expected = false},
-                {operator = "!=" , params = array(true, 0/0), expected = true},
-                {operator = "!=" , params = array(false, true), expected = true},
-                {operator = "!=" , params = array(false, false), expected = false},
-                {operator = "!=" , params = array(false, 1), expected = true},
-                {operator = "!=" , params = array(false, 0), expected = false},
-                {operator = "!=" , params = array(false, -1), expected = true},
-                {operator = "!=" , params = array(false, "true"), expected = true },
-                {operator = "!=" , params = array(false, "false"), expected = true },
-                {operator = "!=" , params = array(false, "1"), expected = true},
-                {operator = "!=" , params = array(false, "0"), expected = false},
-                {operator = "!=" , params = array(false, "-1"), expected = true},
-                {operator = "!=" , params = array(false, ""), expected = false},
-                {operator = "!=" , params = array(false, nil), expected = true},
-                {operator = "!=" , params = array(false, undefined), expected = true},
-                {operator = "!=" , params = array(false, 1/0), expected = true},
-                {operator = "!=" , params = array(false, -1/0), expected = true},
-                {operator = "!=" , params = array(false, array()), expected = false},
-                {operator = "!=" , params = array(false, {}), expected = true},
-                {operator = "!=" , params = array(false, array(array())), expected = false},
-                {operator = "!=" , params = array(false, array(0)), expected = false},
-                {operator = "!=" , params = array(false, array(1)), expected = true},
-                {operator = "!=" , params = array(false, 0/0), expected = true},
-                {operator = "!=" , params = array(1, true), expected = false},
-                {operator = "!=" , params = array(1, false), expected = true},
-                {operator = "!=" , params = array(1, 1), expected = false},
-                {operator = "!=" , params = array(1, 0), expected = true},
-                {operator = "!=" , params = array(1, -1), expected = true},
-                {operator = "!=" , params = array(1, "true"), expected = true },
-                {operator = "!=" , params = array(1, "false"), expected = true },
-                {operator = "!=" , params = array(1, "1"), expected = false},
-                {operator = "!=" , params = array(1, "0"), expected = true},
-                {operator = "!=" , params = array(1, "-1"), expected = true},
-                {operator = "!=" , params = array(1, ""), expected = true},
-                {operator = "!=" , params = array(1, nil), expected = true},
-                {operator = "!=" , params = array(1, undefined), expected = true},
-                {operator = "!=" , params = array(1, 1/0), expected = true},
-                {operator = "!=" , params = array(1, -1/0), expected = true},
-                {operator = "!=" , params = array(1, array()), expected = true},
-                {operator = "!=" , params = array(1, {}), expected = true},
-                {operator = "!=" , params = array(1, array(array())), expected = true},
-                {operator = "!=" , params = array(1, array(0)), expected = true},
-                {operator = "!=" , params = array(1, array(1)), expected = false},
-                {operator = "!=" , params = array(1, 0/0), expected = true},
-                {operator = "!=" , params = array(0, true), expected = true},
-                {operator = "!=" , params = array(0, false), expected = false},
-                {operator = "!=" , params = array(0, 1), expected = true},
-                {operator = "!=" , params = array(0, 0), expected = false},
-                {operator = "!=" , params = array(0, -1), expected = true},
-                {operator = "!=" , params = array(0, "true"), expected = true },
-                {operator = "!=" , params = array(0, "false"), expected = true },
-                {operator = "!=" , params = array(0, "1"), expected = true},
-                {operator = "!=" , params = array(0, "0"), expected = false},
-                {operator = "!=" , params = array(0, "-1"), expected = true},
-                {operator = "!=" , params = array(0, ""), expected = false},
-                {operator = "!=" , params = array(0, nil), expected = true},
-                {operator = "!=" , params = array(0, undefined), expected = true},
-                {operator = "!=" , params = array(0, 1/0), expected = true},
-                {operator = "!=" , params = array(0, -1/0), expected = true},
-                {operator = "!=" , params = array(0, array()), expected = false},
-                {operator = "!=" , params = array(0, {}), expected = true},
-                {operator = "!=" , params = array(0, array(array())), expected = false},
-                {operator = "!=" , params = array(0, array(0)), expected = false},
-                {operator = "!=" , params = array(0, array(1)), expected = true},
-                {operator = "!=" , params = array(0, 0/0), expected = true},
-                {operator = "!=" , params = array(-1, true), expected = true},
-                {operator = "!=" , params = array(-1, false), expected = true},
-                {operator = "!=" , params = array(-1, 1), expected = true},
-                {operator = "!=" , params = array(-1, 0), expected = true},
-                {operator = "!=" , params = array(-1, -1), expected = false},
-                {operator = "!=" , params = array(-1, "true"), expected = true },
-                {operator = "!=" , params = array(-1, "false"), expected = true },
-                {operator = "!=" , params = array(-1, "1"), expected = true},
-                {operator = "!=" , params = array(-1, "0"), expected = true},
-                {operator = "!=" , params = array(-1, "-1"), expected = false},
-                {operator = "!=" , params = array(-1, ""), expected = true},
-                {operator = "!=" , params = array(-1, nil), expected = true},
-                {operator = "!=" , params = array(-1, undefined), expected = true},
-                {operator = "!=" , params = array(-1, 1/0), expected = true},
-                {operator = "!=" , params = array(-1, -1/0), expected = true},
-                {operator = "!=" , params = array(-1, array()), expected = true},
-                {operator = "!=" , params = array(-1, {}), expected = true},
-                {operator = "!=" , params = array(-1, array(array())), expected = true},
-                {operator = "!=" , params = array(-1, array(0)), expected = true},
-                {operator = "!=" , params = array(-1, array(1)), expected = true},
-                {operator = "!=" , params = array(-1, 0/0), expected = true},
-                {operator = "!=" , params = array("true", true), expected = true},
-                {operator = "!=" , params = array("true", false), expected = true},
-                {operator = "!=" , params = array("true", 1), expected = true},
-                {operator = "!=" , params = array("true", 0), expected = true},
-                {operator = "!=" , params = array("true", -1), expected = true},
-                {operator = "!=" , params = array("true", "true"), expected = false },
-                {operator = "!=" , params = array("true", "false"), expected = true },
-                {operator = "!=" , params = array("true", "1"), expected = true},
-                {operator = "!=" , params = array("true", "0"), expected = true},
-                {operator = "!=" , params = array("true", "-1"), expected = true},
-                {operator = "!=" , params = array("true", ""), expected = true},
-                {operator = "!=" , params = array("true", nil), expected = true},
-                {operator = "!=" , params = array("true", undefined), expected = true},
-                {operator = "!=" , params = array("true", 1/0), expected = true},
-                {operator = "!=" , params = array("true", -1/0), expected = true},
-                {operator = "!=" , params = array("true", array()), expected = true},
-                {operator = "!=" , params = array("true", {}), expected = true},
-                {operator = "!=" , params = array("true", array(array())), expected = true},
-                {operator = "!=" , params = array("true", array(0)), expected = true},
-                {operator = "!=" , params = array("true", array(1)), expected = true},
-                {operator = "!=" , params = array("true", 0/0), expected = true},
-                {operator = "!=" , params = array("false", true), expected = true},
-                {operator = "!=" , params = array("false", false), expected = true},
-                {operator = "!=" , params = array("false", 1), expected = true},
-                {operator = "!=" , params = array("false", 0), expected = true},
-                {operator = "!=" , params = array("false", -1), expected = true},
-                {operator = "!=" , params = array("false", "true"), expected = true },
-                {operator = "!=" , params = array("false", "false"), expected = false },
-                {operator = "!=" , params = array("false", "1"), expected = true},
-                {operator = "!=" , params = array("false", "0"), expected = true},
-                {operator = "!=" , params = array("false", "-1"), expected = true},
-                {operator = "!=" , params = array("false", ""), expected = true},
-                {operator = "!=" , params = array("false", nil), expected = true},
-                {operator = "!=" , params = array("false", undefined), expected = true},
-                {operator = "!=" , params = array("false", 1/0), expected = true},
-                {operator = "!=" , params = array("false", -1/0), expected = true},
-                {operator = "!=" , params = array("false", array()), expected = true},
-                {operator = "!=" , params = array("false", {}), expected = true},
-                {operator = "!=" , params = array("false", array(array())), expected = true},
-                {operator = "!=" , params = array("false", array(0)), expected = true},
-                {operator = "!=" , params = array("false", array(1)), expected = true},
-                {operator = "!=" , params = array("false", 0/0), expected = true},
-                {operator = "!=" , params = array("1", true), expected = false},
-                {operator = "!=" , params = array("1", false), expected = true},
-                {operator = "!=" , params = array("1", 1), expected = false},
-                {operator = "!=" , params = array("1", 0), expected = true},
-                {operator = "!=" , params = array("1", -1), expected = true},
-                {operator = "!=" , params = array("1", "true"), expected = true },
-                {operator = "!=" , params = array("1", "false"), expected = true },
-                {operator = "!=" , params = array("1", "1"), expected = false},
-                {operator = "!=" , params = array("1", "0"), expected = true},
-                {operator = "!=" , params = array("1", "-1"), expected = true},
-                {operator = "!=" , params = array("1", ""), expected = true},
-                {operator = "!=" , params = array("1", nil), expected = true},
-                {operator = "!=" , params = array("1", undefined), expected = true},
-                {operator = "!=" , params = array("1", 1/0), expected = true},
-                {operator = "!=" , params = array("1", -1/0), expected = true},
-                {operator = "!=" , params = array("1", array()), expected = true},
-                {operator = "!=" , params = array("1", {}), expected = true},
-                {operator = "!=" , params = array("1", array(array())), expected = true},
-                {operator = "!=" , params = array("1", array(0)), expected = true},
-                {operator = "!=" , params = array("1", array(1)), expected = false},
-                {operator = "!=" , params = array("1", 0/0), expected = true},
-                {operator = "!=" , params = array("0", true), expected = true},
-                {operator = "!=" , params = array("0", false), expected = false},
-                {operator = "!=" , params = array("0", 1), expected = true},
-                {operator = "!=" , params = array("0", 0), expected = false},
-                {operator = "!=" , params = array("0", -1), expected = true},
-                {operator = "!=" , params = array("0", "true"), expected = true },
-                {operator = "!=" , params = array("0", "false"), expected = true },
-                {operator = "!=" , params = array("0", "1"), expected = true},
-                {operator = "!=" , params = array("0", "0"), expected = false},
-                {operator = "!=" , params = array("0", "-1"), expected = true},
-                {operator = "!=" , params = array("0", ""), expected = true},
-                {operator = "!=" , params = array("0", nil), expected = true},
-                {operator = "!=" , params = array("0", undefined), expected = true},
-                {operator = "!=" , params = array("0", 1/0), expected = true},
-                {operator = "!=" , params = array("0", -1/0), expected = true},
-                {operator = "!=" , params = array("0", array()), expected = true},
-                {operator = "!=" , params = array("0", {}), expected = true},
-                {operator = "!=" , params = array("0", array(array())), expected = true},
-                {operator = "!=" , params = array("0", array(0)), expected = false},
-                {operator = "!=" , params = array("0", array(1)), expected = true},
-                {operator = "!=" , params = array("0", 0/0), expected = true},
-                {operator = "!=" , params = array("-1", true), expected = true},
-                {operator = "!=" , params = array("-1", false), expected = true},
-                {operator = "!=" , params = array("-1", 1), expected = true},
-                {operator = "!=" , params = array("-1", 0), expected = true},
-                {operator = "!=" , params = array("-1", -1), expected = false},
-                {operator = "!=" , params = array("-1", "true"), expected = true },
-                {operator = "!=" , params = array("-1", "false"), expected = true },
-                {operator = "!=" , params = array("-1", "1"), expected = true},
-                {operator = "!=" , params = array("-1", "0"), expected = true},
-                {operator = "!=" , params = array("-1", "-1"), expected = false},
-                {operator = "!=" , params = array("-1", ""), expected = true},
-                {operator = "!=" , params = array("-1", nil), expected = true},
-                {operator = "!=" , params = array("-1", undefined), expected = true},
-                {operator = "!=" , params = array("-1", 1/0), expected = true},
-                {operator = "!=" , params = array("-1", -1/0), expected = true},
-                {operator = "!=" , params = array("-1", array()), expected = true},
-                {operator = "!=" , params = array("-1", {}), expected = true},
-                {operator = "!=" , params = array("-1", array(array())), expected = true},
-                {operator = "!=" , params = array("-1", array(0)), expected = true},
-                {operator = "!=" , params = array("-1", array(1)), expected = true},
-                {operator = "!=" , params = array("-1", 0/0), expected = true},
-                {operator = "!=" , params = array("", true), expected = true},
-                {operator = "!=" , params = array("", false), expected = false},
-                {operator = "!=" , params = array("", 1), expected = true},
-                {operator = "!=" , params = array("", 0), expected = false},
-                {operator = "!=" , params = array("", -1), expected = true},
-                {operator = "!=" , params = array("", "true"), expected = true },
-                {operator = "!=" , params = array("", "false"), expected = true },
-                {operator = "!=" , params = array("", "1"), expected = true},
-                {operator = "!=" , params = array("", "0"), expected = true},
-                {operator = "!=" , params = array("", "-1"), expected = true},
-                {operator = "!=" , params = array("", ""), expected = false},
-                {operator = "!=" , params = array("", nil), expected = true},
-                {operator = "!=" , params = array("", undefined), expected = true},
-                {operator = "!=" , params = array("", 1/0), expected = true},
-                {operator = "!=" , params = array("", -1/0), expected = true},
-                {operator = "!=" , params = array("", array()), expected = false},
-                {operator = "!=" , params = array("", {}), expected = true},
-                {operator = "!=" , params = array("", array(array())), expected = false},
-                {operator = "!=" , params = array("", array(0)), expected = true},
-                {operator = "!=" , params = array("", array(1)), expected = true},
-                {operator = "!=" , params = array("", 0/0), expected = true},
-                {operator = "!=" , params = array(nil, true), expected = true},
-                {operator = "!=" , params = array(nil, false), expected = true},
-                {operator = "!=" , params = array(nil, 1), expected = true},
-                {operator = "!=" , params = array(nil, 0), expected = true},
-                {operator = "!=" , params = array(nil, -1), expected = true},
-                {operator = "!=" , params = array(nil, "true"), expected = true },
-                {operator = "!=" , params = array(nil, "false"), expected = true },
-                {operator = "!=" , params = array(nil, "1"), expected = true},
-                {operator = "!=" , params = array(nil, "0"), expected = true},
-                {operator = "!=" , params = array(nil, "-1"), expected = true},
-                {operator = "!=" , params = array(nil, ""), expected = true},
-                {operator = "!=" , params = array(nil, nil), expected = false},
-                {operator = "!=" , params = array(nil, undefined), expected = false},
-                {operator = "!=" , params = array(nil, 1/0), expected = true},
-                {operator = "!=" , params = array(nil, -1/0), expected = true},
-                {operator = "!=" , params = array(nil, array()), expected = true},
-                {operator = "!=" , params = array(nil, {}), expected = true},
-                {operator = "!=" , params = array(nil, array(array())), expected = true},
-                {operator = "!=" , params = array(nil, array(0)), expected = true},
-                {operator = "!=" , params = array(nil, array(1)), expected = true},
-                {operator = "!=" , params = array(nil, 0/0), expected = true},
-                {operator = "!=" , params = array(undefined, true), expected = true},
-                {operator = "!=" , params = array(undefined, false), expected = true},
-                {operator = "!=" , params = array(undefined, 1), expected = true},
-                {operator = "!=" , params = array(undefined, 0), expected = true},
-                {operator = "!=" , params = array(undefined, -1), expected = true},
-                {operator = "!=" , params = array(undefined, "true"), expected = true },
-                {operator = "!=" , params = array(undefined, "false"), expected = true },
-                {operator = "!=" , params = array(undefined, "1"), expected = true},
-                {operator = "!=" , params = array(undefined, "0"), expected = true},
-                {operator = "!=" , params = array(undefined, "-1"), expected = true},
-                {operator = "!=" , params = array(undefined, ""), expected = true},
-                {operator = "!=" , params = array(undefined, nil), expected = false},
-                {operator = "!=" , params = array(undefined, undefined), expected = false},
-                {operator = "!=" , params = array(undefined, 1/0), expected = true},
-                {operator = "!=" , params = array(undefined, -1/0), expected = true},
-                {operator = "!=" , params = array(undefined, array()), expected = true},
-                {operator = "!=" , params = array(undefined, {}), expected = true},
-                {operator = "!=" , params = array(undefined, array(array())), expected = true},
-                {operator = "!=" , params = array(undefined, array(0)), expected = true},
-                {operator = "!=" , params = array(undefined, array(1)), expected = true},
-                {operator = "!=" , params = array(undefined, 0/0), expected = true},
-                {operator = "!=" , params = array(1/0, true), expected = true},
-                {operator = "!=" , params = array(1/0, false), expected = true},
-                {operator = "!=" , params = array(1/0, 1), expected = true},
-                {operator = "!=" , params = array(1/0, 0), expected = true},
-                {operator = "!=" , params = array(1/0, -1), expected = true},
-                {operator = "!=" , params = array(1/0, "true"), expected = true },
-                {operator = "!=" , params = array(1/0, "false"), expected = true },
-                {operator = "!=" , params = array(1/0, "1"), expected = true},
-                {operator = "!=" , params = array(1/0, "0"), expected = true},
-                {operator = "!=" , params = array(1/0, "-1"), expected = true},
-                {operator = "!=" , params = array(1/0, ""), expected = true},
-                {operator = "!=" , params = array(1/0, nil), expected = true},
-                {operator = "!=" , params = array(1/0, undefined), expected = true},
-                {operator = "!=" , params = array(1/0, 1/0), expected = false},
-                {operator = "!=" , params = array(1/0, -1/0), expected = true},
-                {operator = "!=" , params = array(1/0, array()), expected = true},
-                {operator = "!=" , params = array(1/0, {}), expected = true},
-                {operator = "!=" , params = array(1/0, array(array())), expected = true},
-                {operator = "!=" , params = array(1/0, array(0)), expected = true},
-                {operator = "!=" , params = array(1/0, array(1)), expected = true},
-                {operator = "!=" , params = array(1/0, 0/0), expected = true},
-                {operator = "!=" , params = array(-1/0, true), expected = true},
-                {operator = "!=" , params = array(-1/0, false), expected = true},
-                {operator = "!=" , params = array(-1/0, 1), expected = true},
-                {operator = "!=" , params = array(-1/0, 0), expected = true},
-                {operator = "!=" , params = array(-1/0, -1), expected = true},
-                {operator = "!=" , params = array(-1/0, "true"), expected = true },
-                {operator = "!=" , params = array(-1/0, "false"), expected = true },
-                {operator = "!=" , params = array(-1/0, "1"), expected = true},
-                {operator = "!=" , params = array(-1/0, "0"), expected = true},
-                {operator = "!=" , params = array(-1/0, "-1"), expected = true},
-                {operator = "!=" , params = array(-1/0, ""), expected = true},
-                {operator = "!=" , params = array(-1/0, nil), expected = true},
-                {operator = "!=" , params = array(-1/0, undefined), expected = true},
-                {operator = "!=" , params = array(-1/0, 1/0), expected = true},
-                {operator = "!=" , params = array(-1/0, -1/0), expected = false},
-                {operator = "!=" , params = array(-1/0, array()), expected = true},
-                {operator = "!=" , params = array(-1/0, {}), expected = true},
-                {operator = "!=" , params = array(-1/0, array(array())), expected = true},
-                {operator = "!=" , params = array(-1/0, array(0)), expected = true},
-                {operator = "!=" , params = array(-1/0, array(1)), expected = true},
-                {operator = "!=" , params = array(-1/0, 0/0), expected = true},
-                {operator = "!=" , params = array(array(), true), expected = true},
-                {operator = "!=" , params = array(array(), false), expected = false},
-                {operator = "!=" , params = array(array(), 1), expected = true},
-                {operator = "!=" , params = array(array(), 0), expected = false},
-                {operator = "!=" , params = array(array(), -1), expected = true},
-                {operator = "!=" , params = array(array(), "true"), expected = true },
-                {operator = "!=" , params = array(array(), "false"), expected = true },
-                {operator = "!=" , params = array(array(), "1"), expected = true},
-                {operator = "!=" , params = array(array(), "0"), expected = true},
-                {operator = "!=" , params = array(array(), "-1"), expected = true},
-                {operator = "!=" , params = array(array(), ""), expected = false},
-                {operator = "!=" , params = array(array(), nil), expected = true},
-                {operator = "!=" , params = array(array(), undefined), expected = true},
-                {operator = "!=" , params = array(array(), 1/0), expected = true},
-                {operator = "!=" , params = array(array(), -1/0), expected = true},
-                {operator = "!=" , params = array(array(), array()), expected = true},
-                {operator = "!=" , params = array(array(), {}), expected = true},
-                {operator = "!=" , params = array(array(), array(array())), expected = true},
-                {operator = "!=" , params = array(array(), array(0)), expected = true},
-                {operator = "!=" , params = array(array(), array(1)), expected = true},
-                {operator = "!=" , params = array(array(), 0/0), expected = true},
-                {operator = "!=" , params = array({}, true), expected = true},
-                {operator = "!=" , params = array({}, false), expected = true},
-                {operator = "!=" , params = array({}, 1), expected = true},
-                {operator = "!=" , params = array({}, 0), expected = true},
-                {operator = "!=" , params = array({}, -1), expected = true},
-                {operator = "!=" , params = array({}, "true"), expected = true },
-                {operator = "!=" , params = array({}, "false"), expected = true },
-                {operator = "!=" , params = array({}, "1"), expected = true},
-                {operator = "!=" , params = array({}, "0"), expected = true},
-                {operator = "!=" , params = array({}, "-1"), expected = true},
-                {operator = "!=" , params = array({}, ""), expected = true},
-                {operator = "!=" , params = array({}, nil), expected = true},
-                {operator = "!=" , params = array({}, undefined), expected = true},
-                {operator = "!=" , params = array({}, 1/0), expected = true},
-                {operator = "!=" , params = array({}, -1/0), expected = true},
-                {operator = "!=" , params = array({}, array()), expected = true},
-                {operator = "!=" , params = array({}, {}), expected = true},
-                {operator = "!=" , params = array({}, array(array())), expected = true},
-                {operator = "!=" , params = array({}, array(0)), expected = true},
-                {operator = "!=" , params = array({}, array(1)), expected = true},
-                {operator = "!=" , params = array({}, 0/0), expected = true},
-                {operator = "!=" , params = array(array(array()), true), expected = true},
-                {operator = "!=" , params = array(array(array()), false), expected = false},
-                {operator = "!=" , params = array(array(array()), 1), expected = true},
-                {operator = "!=" , params = array(array(array()), 0), expected = false},
-                {operator = "!=" , params = array(array(array()), -1), expected = true},
-                {operator = "!=" , params = array(array(array()), "true"), expected = true },
-                {operator = "!=" , params = array(array(array()), "false"), expected = true },
-                {operator = "!=" , params = array(array(array()), "1"), expected = true},
-                {operator = "!=" , params = array(array(array()), "0"), expected = true},
-                {operator = "!=" , params = array(array(array()), "-1"), expected = true},
-                {operator = "!=" , params = array(array(array()), ""), expected = false},
-                {operator = "!=" , params = array(array(array()), nil), expected = true},
-                {operator = "!=" , params = array(array(array()), undefined), expected = true},
-                {operator = "!=" , params = array(array(array()), 1/0), expected = true},
-                {operator = "!=" , params = array(array(array()), -1/0), expected = true},
-                {operator = "!=" , params = array(array(array()), array()), expected = true},
-                {operator = "!=" , params = array(array(array()), {}), expected = true},
-                {operator = "!=" , params = array(array(array()), array(array())), expected = true},
-                {operator = "!=" , params = array(array(array()), array(0)), expected = true},
-                {operator = "!=" , params = array(array(array()), array(1)), expected = true},
-                {operator = "!=" , params = array(array(array()), 0/0), expected = true},
-                {operator = "!=" , params = array(array(0), true), expected = true},
-                {operator = "!=" , params = array(array(0), false), expected = false},
-                {operator = "!=" , params = array(array(0), 1), expected = true},
-                {operator = "!=" , params = array(array(0), 0), expected = false},
-                {operator = "!=" , params = array(array(0), -1), expected = true},
-                {operator = "!=" , params = array(array(0), "true"), expected = true },
-                {operator = "!=" , params = array(array(0), "false"), expected = true },
-                {operator = "!=" , params = array(array(0), "1"), expected = true},
-                {operator = "!=" , params = array(array(0), "0"), expected = false},
-                {operator = "!=" , params = array(array(0), "-1"), expected = true},
-                {operator = "!=" , params = array(array(0), ""), expected = true},
-                {operator = "!=" , params = array(array(0), nil), expected = true},
-                {operator = "!=" , params = array(array(0), undefined), expected = true},
-                {operator = "!=" , params = array(array(0), 1/0), expected = true},
-                {operator = "!=" , params = array(array(0), -1/0), expected = true},
-                {operator = "!=" , params = array(array(0), array()), expected = true},
-                {operator = "!=" , params = array(array(0), {}), expected = true},
-                {operator = "!=" , params = array(array(0), array(array())), expected = true},
-                {operator = "!=" , params = array(array(0), array(0)), expected = true},
-                {operator = "!=" , params = array(array(0), array(1)), expected = true},
-                {operator = "!=" , params = array(array(0), 0/0), expected = true},
-                {operator = "!=" , params = array(array(1), true), expected = false},
-                {operator = "!=" , params = array(array(1), false), expected = true},
-                {operator = "!=" , params = array(array(1), 1), expected = false},
-                {operator = "!=" , params = array(array(1), 0), expected = true},
-                {operator = "!=" , params = array(array(1), -1), expected = true},
-                {operator = "!=" , params = array(array(1), "true"), expected = true },
-                {operator = "!=" , params = array(array(1), "false"), expected = true },
-                {operator = "!=" , params = array(array(1), "1"), expected = false},
-                {operator = "!=" , params = array(array(1), "0"), expected = true},
-                {operator = "!=" , params = array(array(1), "-1"), expected = true},
-                {operator = "!=" , params = array(array(1), ""), expected = true},
-                {operator = "!=" , params = array(array(1), nil), expected = true},
-                {operator = "!=" , params = array(array(1), undefined), expected = true},
-                {operator = "!=" , params = array(array(1), 1/0), expected = true},
-                {operator = "!=" , params = array(array(1), -1/0), expected = true},
-                {operator = "!=" , params = array(array(1), array()), expected = true},
-                {operator = "!=" , params = array(array(1), {}), expected = true},
-                {operator = "!=" , params = array(array(1), array(array())), expected = true},
-                {operator = "!=" , params = array(array(1), array(0)), expected = true},
-                {operator = "!=" , params = array(array(1), array(1)), expected = true},
-                {operator = "!=" , params = array(array(1), 0/0), expected = true},
-                {operator = "!=" , params = array(0/0, true), expected = true},
-                {operator = "!=" , params = array(0/0, false), expected = true},
-                {operator = "!=" , params = array(0/0, 1), expected = true},
-                {operator = "!=" , params = array(0/0, 0), expected = true},
-                {operator = "!=" , params = array(0/0, -1), expected = true},
-                {operator = "!=" , params = array(0/0, "true"), expected = true },
-                {operator = "!=" , params = array(0/0, "false"), expected = true },
-                {operator = "!=" , params = array(0/0, "1"), expected = true},
-                {operator = "!=" , params = array(0/0, "0"), expected = true},
-                {operator = "!=" , params = array(0/0, "-1"), expected = true},
-                {operator = "!=" , params = array(0/0, ""), expected = true},
-                {operator = "!=" , params = array(0/0, nil), expected = true},
-                {operator = "!=" , params = array(0/0, undefined), expected = true},
-                {operator = "!=" , params = array(0/0, 1/0), expected = true},
-                {operator = "!=" , params = array(0/0, -1/0), expected = true},
-                {operator = "!=" , params = array(0/0, array()), expected = true},
-                {operator = "!=" , params = array(0/0, {}), expected = true},
-                {operator = "!=" , params = array(0/0, array(array())), expected = true},
-                {operator = "!=" , params = array(0/0, array(0)), expected = true},
-                {operator = "!=" , params = array(0/0, array(1)), expected = true},
-                {operator = "!=" , params = array(0/0, 0/0), expected = true},
-            }
-            logic_test(test_table)
-        end)
-        it("should return result of strict equality evaluation when using '===' operator", function ()
-            local test_table={
-                {operator = "===", params = array(true,true), expected = true},
-                {operator = "===", params = array(true,1), expected = false},
-                {operator = "===", params = array(false,false), expected = true},
-                {operator = "===", params = array(false,0), expected = false},
-                {operator = "===", params = array(false,""), expected = false},
-                {operator = "===", params = array(1,"1"), expected = false},
-                {operator = "===", params = array(0,"0"), expected = false},
-                {operator = "===", params = array(0,array()), expected = false},
-                {operator = "===", params = array(0,array(0)), expected = false},
-                {operator = "===", params = array(array(),array()), expected = false},
-            }
-            logic_test(test_table)
-        end)
-        it("should return result of strict inequality evaluation when using '!==' operator", function ()
-            local test_table={
-                {operator = "!==", params = array(true,true), expected = false},
-                {operator = "!==", params = array(true,1), expected = true},
-                {operator = "!==", params = array(false,false), expected = false},
-                {operator = "!==", params = array(false,0), expected = true},
-                {operator = "!==", params = array(false,""), expected = true},
-                {operator = "!==", params = array(1,"1"), expected = true},
-                {operator = "!==", params = array(0,"0"), expected = true},
-                {operator = "!==", params = array(0,array()), expected = true},
-                {operator = "!==", params = array(0,array(0)), expected = true},
-                {operator = "!==", params = array(array(),array()), expected = true},
-            }
-            logic_test(test_table)
-        end)
-    end)
-    describe("given one item", function ()
-        it("should return the negation of the item when using '!' operator", function ()
-            local test_table={
-                {operator = "!", params = array(false), expected = true},
-                {operator = "!", params = array(nil), expected = true},
-                {operator = "!", params = array(undefined), expected = true},
-                {operator = "!", params = array(0), expected = true},
-                {operator = "!", params = array(""), expected = true},
-                {operator = "!", params = array(0/0), expected = true},
-                {operator = "!", params = array(undefined), expected = true},
-                {operator = "!", params = array("0"), expected = false},
-                {operator = "!", params = array(true), expected = false},
-                {operator = "!", params = array(1), expected = false},
-                {operator = "!", params = array(-1), expected = false},
-                {operator = "!", params = array("true"), expected = false},
-                {operator = "!", params = array("false"), expected = false},
-                {operator = "!", params = array("1"), expected = false},
-                {operator = "!", params = array("-1"), expected = false},
-                {operator = "!", params = array(1/0), expected = false},
-                {operator = "!", params = array(-1/0), expected = false},
-                {operator = "!", params = array(array()), expected = false},
-                {operator = "!", params = array({}), expected = false},
-            }
-            logic_test(test_table)
-        end)
-        it("should return the double negation of the item when using '!!' operator", function ()
-            local test_table={
-                {operator = "!!", params = array(false), expected = false},
-                {operator = "!!", params = array(nil), expected = false},
-                {operator = "!!", params = array(undefined), expected = false},
-                {operator = "!!", params = array(0), expected = false},
-                {operator = "!!", params = array(""), expected = false},
-                {operator = "!!", params = array(0/0), expected = false},
-                {operator = "!!", params = array(undefined), expected = false},
-                {operator = "!!", params = array("0"), expected = true},
-                {operator = "!!", params = array(true), expected = true},
-                {operator = "!!", params = array(1), expected = true},
-                {operator = "!!", params = array(-1), expected = true},
-                {operator = "!!", params = array("true"), expected = true},
-                {operator = "!!", params = array("false"), expected = true},
-                {operator = "!!", params = array("1"), expected = true},
-                {operator = "!!", params = array("-1"), expected = true},
-                {operator = "!!", params = array(1/0), expected = true},
-                {operator = "!!", params = array(-1/0), expected = true},
-                {operator = "!!", params = array(array()), expected = true},
-                {operator = "!!", params = array({}), expected = true},
-            }
-            logic_test(test_table)
-        end)
-    end)
-end)
-
-describe("json-logic operation test", function ()
-    describe("given unregistered operation", function ()
-        local test_table = {
-            {logic = {echo = array(1,2,3)}},
-            {logic = {first = array(1,2,3)}},
-        }
-        it("should return the original logic", function ()
-            for i, t in ipairs(test_table) do
-                local res = logic_apply(t.logic, nil)
-                assert.message('failed at index: ' .. i).are.equal(t.logic, res)
-            end
-        end)
-    end)
-
-    describe("given new operation to be registered", function ()
-        local test_table = {
-            {
-                new_op_name = "echo",
-                new_op = function(_, ...)
-                    arg["n"] = nil
-                    return arg
-                end,
-                logic = {echo = array(array(1,2,3,4,5))},
-                expected = array(array(1,2,3,4,5)),
-             },
-             {
-                new_op_name = "first",
-                new_op = function(_, ...)
-                    -- return first parameter
-                    return arg[1]
-                end,
-                logic = {first = array(5,4,3,2,1)},
-                expected = 5,
-             },
-        }
-        it("should call the new operation correctly", function ()
-            for i, t in ipairs(test_table) do
-                local called = 0
-                local operation = function(data, ...)
-                    local res =  t.new_op(data, ...)
-                    called = called + 1
-                    return res
-                end
-                local options = {custom_operations = {}}
-                options.custom_operations[t.new_op_name] = operation
-                local res = logic_apply(t.logic, nil, options)
-                assert.message("the new operation was not called once").are.equal(1, called)
-                assert.message('failed at index: ' .. i).are.same(t.expected, res)
-            end
-        end)
-    end)
-end)
-
-describe("json-logic custom nil value", function ()
-    -- some json decoder (e.g. lua cjson) use a custom value to represent json null instead of using lua nil value
-    local custom_nil = {}
-    local null = function()
-        return custom_nil
-    end
-    local function logic_test(test_table)
-        for i, t in ipairs(test_table) do
-            assert.message('failed at index: ' .. i).are.equal(t.expected, logic_apply(t.logic, t.data, {null = null}))
-        end
-    end
-
-    describe("given a logic with custom null function", function ()
-        local kv_data = {}
-        local test_table = {
-            {logic = {var = "attr3"}, data = {}, expected = custom_nil},
-            {logic = {var = custom_nil }, data = kv_data, expected = kv_data},
-            {logic = logic.new_logic("!", custom_nil), data = {}, expected = true},
-            {logic = logic.new_logic("!!", custom_nil), data = {}, expected = false},
-        }
-        it("should return custom nil value as defined in the null function", function ()
-            logic_test(test_table)
-        end)
-    end)
-end)
-
-describe("json-logic nested operations", function ()
-    local function logic_test(test_table)
-        for i, t in ipairs(test_table) do
-            local res = logic_apply(t.logic, t.data, {custom_operations = t.op})
-            assert.message('failed at index: ' .. i).are.equal(t.expected, res)
-        end
-    end
-    describe("given nested custom operations", function ()
-        it("should invoke the right operations", function ()
-            local test_table = {
-                {
-                    logic = {["req.get_method"] = {}},
-                    op = {
-                        req = {
-                            get_method = function()
-                                return "GET"
-                            end
+        describe(
+            'given table',
+            function()
+                it(
+                    'should return number of element in the table',
+                    function()
+                        local test_table = {
+                            {params = array({}), expected = 0},
+                            {params = array({1, 2, 3, 4, 5}), expected = 5},
+                            {params = array({1, 2, 3, 4, 5, {1, 2, 3, 4, 5}}), expected = 6},
+                            {params = array(array()), expected = 0},
+                            {params = array(array(1, 2, 3, 4, 5, array(1, 2, 3, 4, 5))), expected = 6}
                         }
-                    },
-                    expected = "GET",
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given string',
+            function()
+                it(
+                    'should return the length of the string',
+                    function()
+                        local test_table = {
+                            {params = array(''), expected = 0},
+                            {params = array('12345'), expected = 5},
+                            {params = array('1234567890'), expected = 10},
+                            {params = '', expected = 0},
+                            {params = '12345', expected = 5},
+                            {params = '1234567890', expected = 10}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given parameters other than table and string',
+            function()
+                it(
+                    'should return 0',
+                    function()
+                        local test_table = {
+                            {params = array(1), expected = 0},
+                            {params = array(true), expected = 0},
+                            {params = 1, expected = 0},
+                            {params = true, expected = 0}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    'json-logic number test',
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
+                if t.expected ~= t.expected and res ~= res then
+                    -- test nan
+                else
+                    assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+                end
+            end
+        end
+        describe(
+            'given two or more numbers',
+            function()
+                it(
+                    'should do the math :)',
+                    function()
+                        local test_table = {
+                            {operator = '+', params = array(4, 2, 3), expected = 9},
+                            {operator = '-', params = array(4, 2), expected = 2},
+                            {operator = '*', params = array(4, 2), expected = 8},
+                            {operator = '/', params = array(4, 2), expected = 2},
+                            {operator = '*', params = array(2, 2, 2, 2, 2), expected = 32},
+                            {operator = '%', params = array(101, 2), expected = 1},
+                            {operator = '>', params = array(2, 1), expected = true},
+                            {operator = '>', params = array(3, 4), expected = false},
+                            {operator = '>=', params = array(1, 1), expected = true},
+                            {operator = '>=', params = array(-1, 1), expected = false},
+                            {operator = '<', params = array(1, 2), expected = true},
+                            {operator = '<', params = array(3, 2), expected = false},
+                            {operator = '<=', params = array(1, 1), expected = true},
+                            {operator = '<=', params = array(10, 1), expected = false},
+                            {operator = '<', params = array(1, 2, 3), expected = true},
+                            {operator = '<', params = array(1, 2, 1), expected = false},
+                            {operator = '<', params = array(1, 4, 3), expected = false},
+                            {operator = '<', params = array(1, 1, 3), expected = false},
+                            {operator = '<=', params = array(1, 2, 3), expected = true},
+                            {operator = '<=', params = array(1, 1, 3), expected = true},
+                            {operator = '<=', params = array(1, 4, 3), expected = false},
+                            {operator = '-', params = array(-2), expected = 2},
+                            {operator = '-', params = array(2), expected = -2},
+                            {operator = 'max', params = array(1, 10, 3), expected = 10},
+                            {operator = 'min', params = array(-1, 15, 10), expected = -1}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given two or more convertible non numbers',
+            function()
+                it(
+                    'should convert it to numbers and do the math',
+                    function()
+                        local test_table = {
+                            {operator = '+', params = array('3.14'), expected = 3.14},
+                            {operator = '+', params = array(4, 2, '1', 3, 5), expected = 15},
+                            {operator = '+', params = array(array(4), '2'), expected = 6},
+                            {operator = '+', params = array('2'), expected = 2},
+                            {operator = '-', params = array(array('2')), expected = -2},
+                            {operator = '-', params = array(array('2'), array(1)), expected = 1},
+                            {
+                                operator = '*',
+                                params = array(2, array(2), '2', array('2'), array(array(2))),
+                                expected = 32
+                            },
+                            {operator = '/', params = array(array('4'), 2), expected = 2},
+                            {operator = '%', params = array(array(101), '2'), expected = 1},
+                            {operator = '>', params = array('2', array(1)), expected = true},
+                            {operator = '>', params = array('3', '4'), expected = false},
+                            {operator = '>=', params = array(array(1), array()), expected = true},
+                            {operator = '>=', params = array('-1', 1), expected = false},
+                            {operator = '<', params = array(array(1), '2'), expected = true},
+                            {operator = '<', params = array('3', array(array(2))), expected = false},
+                            {operator = '<=', params = array(array(1), array(1)), expected = true},
+                            {operator = '<=', params = array('10', '1'), expected = false},
+                            {operator = '<', params = array('1', '2', array('3')), expected = true},
+                            {operator = '<', params = array(array(1), '2', array(1)), expected = false},
+                            {operator = '<', params = array('1', 4, array('3')), expected = false},
+                            {operator = '<', params = array(1, '1', 3), expected = false},
+                            {operator = '<=', params = array(array(array(1)), 2, '3'), expected = true},
+                            {operator = '<=', params = array(1, array(array('1')), 3), expected = true},
+                            {operator = '<=', params = array(1, array(array(4)), 3), expected = false},
+                            {operator = 'min', params = array(array(1), array(10), 3), expected = 1},
+                            {operator = 'max', params = array(array(1), array(10), 3), expected = 10},
+                            {operator = 'min', params = array(array(1), array(array(10)), 3), expected = 1},
+                            {operator = 'max', params = array(array(1), array(array(10)), 3), expected = 10}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given parameters that includes number-inconvertible data',
+            function()
+                it(
+                    'should return false when operator is comparison',
+                    function()
+                        local test_table = {
+                            {operator = '<', params = array(4, {test = 'test'}, '1'), expected = false},
+                            {operator = '<=', params = array(4, {test = 'test'}, '1'), expected = false},
+                            {operator = '>', params = array(4, {test = 'test'}), expected = false},
+                            {operator = '>=', params = array(4, {test = 'test'}), expected = false}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    "should return string when operator is '+'",
+                    function()
+                        local test_table = {
+                            {operator = '+', params = array(4, {2}, '3'), expected = '4[object Object]3'},
+                            {operator = '+', params = array(4, {test = 'test'}, '1'), expected = '4[object Object]1'},
+                            {operator = '+', params = array('4', 1, 1), expected = '411'},
+                            {operator = '+', params = array('4', array()), expected = '4'}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    "should return nan when operator is '+' but arguments is 1",
+                    function()
+                        local test_table = {
+                            {operator = '-', params = array({test = 'test'}), expected = 0 / 0},
+                            {operator = '-', params = array({3}), expected = 0 / 0},
+                            {
+                                operator = '-',
+                                params = array(
+                                    function()
+                                    end
+                                ),
+                                expected = 0 / 0
+                            }
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    'should return nan when operator for other aritmethic',
+                    function()
+                        local test_table = {
+                            {operator = '-', params = array(4, {test = 'test'}, '1'), expected = 0 / 0},
+                            {operator = '*', params = array(4, {test = 'test'}, '1'), expected = 0 / 0},
+                            {operator = '/', params = array(4, {test = 'test'}, '1'), expected = 0 / 0},
+                            {operator = '%', params = array(4, {test = 'test'}, '1'), expected = 0 / 0}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    'json-logic equality test',
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe(
+            'given two items',
+            function()
+                it(
+                    "should return result of loose equality evaluation when using '==' operator",
+                    function()
+                        local test_table = {
+                            {operator = '==', params = array(true, true), expected = true},
+                            {operator = '==', params = array(true, false), expected = false},
+                            {operator = '==', params = array(true, 1), expected = true},
+                            {operator = '==', params = array(true, 0), expected = false},
+                            {operator = '==', params = array(true, -1), expected = false},
+                            {operator = '==', params = array(true, 'true'), expected = false},
+                            {operator = '==', params = array(true, 'false'), expected = false},
+                            {operator = '==', params = array(true, '1'), expected = true},
+                            {operator = '==', params = array(true, '0'), expected = false},
+                            {operator = '==', params = array(true, '-1'), expected = false},
+                            {operator = '==', params = array(true, ''), expected = false},
+                            {operator = '==', params = array(true, nil), expected = false},
+                            {operator = '==', params = array(true, undefined), expected = false},
+                            {operator = '==', params = array(true, 1 / 0), expected = false},
+                            {operator = '==', params = array(true, -1 / 0), expected = false},
+                            {operator = '==', params = array(true, array()), expected = false},
+                            {operator = '==', params = array(true, {}), expected = false},
+                            {operator = '==', params = array(true, array(array())), expected = false},
+                            {operator = '==', params = array(true, array(0)), expected = false},
+                            {operator = '==', params = array(true, array(1)), expected = true},
+                            {operator = '==', params = array(true, 0 / 0), expected = false},
+                            {operator = '==', params = array(false, true), expected = false},
+                            {operator = '==', params = array(false, false), expected = true},
+                            {operator = '==', params = array(false, 1), expected = false},
+                            {operator = '==', params = array(false, 0), expected = true},
+                            {operator = '==', params = array(false, -1), expected = false},
+                            {operator = '==', params = array(false, 'true'), expected = false},
+                            {operator = '==', params = array(false, 'false'), expected = false},
+                            {operator = '==', params = array(false, '1'), expected = false},
+                            {operator = '==', params = array(false, '0'), expected = true},
+                            {operator = '==', params = array(false, '-1'), expected = false},
+                            {operator = '==', params = array(false, ''), expected = true},
+                            {operator = '==', params = array(false, nil), expected = false},
+                            {operator = '==', params = array(false, undefined), expected = false},
+                            {operator = '==', params = array(false, 1 / 0), expected = false},
+                            {operator = '==', params = array(false, -1 / 0), expected = false},
+                            {operator = '==', params = array(false, array()), expected = true},
+                            {operator = '==', params = array(false, {}), expected = false},
+                            {operator = '==', params = array(false, array(array())), expected = true},
+                            {operator = '==', params = array(false, array(0)), expected = true},
+                            {operator = '==', params = array(false, array(1)), expected = false},
+                            {operator = '==', params = array(false, 0 / 0), expected = false},
+                            {operator = '==', params = array(1, true), expected = true},
+                            {operator = '==', params = array(1, false), expected = false},
+                            {operator = '==', params = array(1, 1), expected = true},
+                            {operator = '==', params = array(1, 0), expected = false},
+                            {operator = '==', params = array(1, -1), expected = false},
+                            {operator = '==', params = array(1, 'true'), expected = false},
+                            {operator = '==', params = array(1, 'false'), expected = false},
+                            {operator = '==', params = array(1, '1'), expected = true},
+                            {operator = '==', params = array(1, '0'), expected = false},
+                            {operator = '==', params = array(1, '-1'), expected = false},
+                            {operator = '==', params = array(1, ''), expected = false},
+                            {operator = '==', params = array(1, nil), expected = false},
+                            {operator = '==', params = array(1, undefined), expected = false},
+                            {operator = '==', params = array(1, 1 / 0), expected = false},
+                            {operator = '==', params = array(1, -1 / 0), expected = false},
+                            {operator = '==', params = array(1, array()), expected = false},
+                            {operator = '==', params = array(1, {}), expected = false},
+                            {operator = '==', params = array(1, array(array())), expected = false},
+                            {operator = '==', params = array(1, array(0)), expected = false},
+                            {operator = '==', params = array(1, array(1)), expected = true},
+                            {operator = '==', params = array(1, 0 / 0), expected = false},
+                            {operator = '==', params = array(0, true), expected = false},
+                            {operator = '==', params = array(0, false), expected = true},
+                            {operator = '==', params = array(0, 1), expected = false},
+                            {operator = '==', params = array(0, 0), expected = true},
+                            {operator = '==', params = array(0, -1), expected = false},
+                            {operator = '==', params = array(0, 'true'), expected = false},
+                            {operator = '==', params = array(0, 'false'), expected = false},
+                            {operator = '==', params = array(0, '1'), expected = false},
+                            {operator = '==', params = array(0, '0'), expected = true},
+                            {operator = '==', params = array(0, '-1'), expected = false},
+                            {operator = '==', params = array(0, ''), expected = true},
+                            {operator = '==', params = array(0, nil), expected = false},
+                            {operator = '==', params = array(0, undefined), expected = false},
+                            {operator = '==', params = array(0, 1 / 0), expected = false},
+                            {operator = '==', params = array(0, -1 / 0), expected = false},
+                            {operator = '==', params = array(0, array()), expected = true},
+                            {operator = '==', params = array(0, {}), expected = false},
+                            {operator = '==', params = array(0, array(array())), expected = true},
+                            {operator = '==', params = array(0, array(0)), expected = true},
+                            {operator = '==', params = array(0, array(1)), expected = false},
+                            {operator = '==', params = array(0, 0 / 0), expected = false},
+                            {operator = '==', params = array(-1, true), expected = false},
+                            {operator = '==', params = array(-1, false), expected = false},
+                            {operator = '==', params = array(-1, 1), expected = false},
+                            {operator = '==', params = array(-1, 0), expected = false},
+                            {operator = '==', params = array(-1, -1), expected = true},
+                            {operator = '==', params = array(-1, 'true'), expected = false},
+                            {operator = '==', params = array(-1, 'false'), expected = false},
+                            {operator = '==', params = array(-1, '1'), expected = false},
+                            {operator = '==', params = array(-1, '0'), expected = false},
+                            {operator = '==', params = array(-1, '-1'), expected = true},
+                            {operator = '==', params = array(-1, ''), expected = false},
+                            {operator = '==', params = array(-1, nil), expected = false},
+                            {operator = '==', params = array(-1, undefined), expected = false},
+                            {operator = '==', params = array(-1, 1 / 0), expected = false},
+                            {operator = '==', params = array(-1, -1 / 0), expected = false},
+                            {operator = '==', params = array(-1, array()), expected = false},
+                            {operator = '==', params = array(-1, {}), expected = false},
+                            {operator = '==', params = array(-1, array(array())), expected = false},
+                            {operator = '==', params = array(-1, array(0)), expected = false},
+                            {operator = '==', params = array(-1, array(1)), expected = false},
+                            {operator = '==', params = array(-1, 0 / 0), expected = false},
+                            {operator = '==', params = array('true', true), expected = false},
+                            {operator = '==', params = array('true', false), expected = false},
+                            {operator = '==', params = array('true', 1), expected = false},
+                            {operator = '==', params = array('true', 0), expected = false},
+                            {operator = '==', params = array('true', -1), expected = false},
+                            {operator = '==', params = array('true', 'true'), expected = true},
+                            {operator = '==', params = array('true', 'false'), expected = false},
+                            {operator = '==', params = array('true', '1'), expected = false},
+                            {operator = '==', params = array('true', '0'), expected = false},
+                            {operator = '==', params = array('true', '-1'), expected = false},
+                            {operator = '==', params = array('true', ''), expected = false},
+                            {operator = '==', params = array('true', nil), expected = false},
+                            {operator = '==', params = array('true', undefined), expected = false},
+                            {operator = '==', params = array('true', 1 / 0), expected = false},
+                            {operator = '==', params = array('true', -1 / 0), expected = false},
+                            {operator = '==', params = array('true', array()), expected = false},
+                            {operator = '==', params = array('true', {}), expected = false},
+                            {operator = '==', params = array('true', array(array())), expected = false},
+                            {operator = '==', params = array('true', array(0)), expected = false},
+                            {operator = '==', params = array('true', array(1)), expected = false},
+                            {operator = '==', params = array('true', 0 / 0), expected = false},
+                            {operator = '==', params = array('false', true), expected = false},
+                            {operator = '==', params = array('false', false), expected = false},
+                            {operator = '==', params = array('false', 1), expected = false},
+                            {operator = '==', params = array('false', 0), expected = false},
+                            {operator = '==', params = array('false', -1), expected = false},
+                            {operator = '==', params = array('false', 'true'), expected = false},
+                            {operator = '==', params = array('false', 'false'), expected = true},
+                            {operator = '==', params = array('false', '1'), expected = false},
+                            {operator = '==', params = array('false', '0'), expected = false},
+                            {operator = '==', params = array('false', '-1'), expected = false},
+                            {operator = '==', params = array('false', ''), expected = false},
+                            {operator = '==', params = array('false', nil), expected = false},
+                            {operator = '==', params = array('false', undefined), expected = false},
+                            {operator = '==', params = array('false', 1 / 0), expected = false},
+                            {operator = '==', params = array('false', -1 / 0), expected = false},
+                            {operator = '==', params = array('false', array()), expected = false},
+                            {operator = '==', params = array('false', {}), expected = false},
+                            {operator = '==', params = array('false', array(array())), expected = false},
+                            {operator = '==', params = array('false', array(0)), expected = false},
+                            {operator = '==', params = array('false', array(1)), expected = false},
+                            {operator = '==', params = array('false', 0 / 0), expected = false},
+                            {operator = '==', params = array('1', true), expected = true},
+                            {operator = '==', params = array('1', false), expected = false},
+                            {operator = '==', params = array('1', 1), expected = true},
+                            {operator = '==', params = array('1', 0), expected = false},
+                            {operator = '==', params = array('1', -1), expected = false},
+                            {operator = '==', params = array('1', 'true'), expected = false},
+                            {operator = '==', params = array('1', 'false'), expected = false},
+                            {operator = '==', params = array('1', '1'), expected = true},
+                            {operator = '==', params = array('1', '0'), expected = false},
+                            {operator = '==', params = array('1', '-1'), expected = false},
+                            {operator = '==', params = array('1', ''), expected = false},
+                            {operator = '==', params = array('1', nil), expected = false},
+                            {operator = '==', params = array('1', undefined), expected = false},
+                            {operator = '==', params = array('1', 1 / 0), expected = false},
+                            {operator = '==', params = array('1', -1 / 0), expected = false},
+                            {operator = '==', params = array('1', array()), expected = false},
+                            {operator = '==', params = array('1', {}), expected = false},
+                            {operator = '==', params = array('1', array(array())), expected = false},
+                            {operator = '==', params = array('1', array(0)), expected = false},
+                            {operator = '==', params = array('1', array(1)), expected = true},
+                            {operator = '==', params = array('1', 0 / 0), expected = false},
+                            {operator = '==', params = array('0', true), expected = false},
+                            {operator = '==', params = array('0', false), expected = true},
+                            {operator = '==', params = array('0', 1), expected = false},
+                            {operator = '==', params = array('0', 0), expected = true},
+                            {operator = '==', params = array('0', -1), expected = false},
+                            {operator = '==', params = array('0', 'true'), expected = false},
+                            {operator = '==', params = array('0', 'false'), expected = false},
+                            {operator = '==', params = array('0', '1'), expected = false},
+                            {operator = '==', params = array('0', '0'), expected = true},
+                            {operator = '==', params = array('0', '-1'), expected = false},
+                            {operator = '==', params = array('0', ''), expected = false},
+                            {operator = '==', params = array('0', nil), expected = false},
+                            {operator = '==', params = array('0', undefined), expected = false},
+                            {operator = '==', params = array('0', 1 / 0), expected = false},
+                            {operator = '==', params = array('0', -1 / 0), expected = false},
+                            {operator = '==', params = array('0', array()), expected = false},
+                            {operator = '==', params = array('0', {}), expected = false},
+                            {operator = '==', params = array('0', array(array())), expected = false},
+                            {operator = '==', params = array('0', array(0)), expected = true},
+                            {operator = '==', params = array('0', array(1)), expected = false},
+                            {operator = '==', params = array('0', 0 / 0), expected = false},
+                            {operator = '==', params = array('-1', true), expected = false},
+                            {operator = '==', params = array('-1', false), expected = false},
+                            {operator = '==', params = array('-1', 1), expected = false},
+                            {operator = '==', params = array('-1', 0), expected = false},
+                            {operator = '==', params = array('-1', -1), expected = true},
+                            {operator = '==', params = array('-1', 'true'), expected = false},
+                            {operator = '==', params = array('-1', 'false'), expected = false},
+                            {operator = '==', params = array('-1', '1'), expected = false},
+                            {operator = '==', params = array('-1', '0'), expected = false},
+                            {operator = '==', params = array('-1', '-1'), expected = true},
+                            {operator = '==', params = array('-1', ''), expected = false},
+                            {operator = '==', params = array('-1', nil), expected = false},
+                            {operator = '==', params = array('-1', undefined), expected = false},
+                            {operator = '==', params = array('-1', 1 / 0), expected = false},
+                            {operator = '==', params = array('-1', -1 / 0), expected = false},
+                            {operator = '==', params = array('-1', array()), expected = false},
+                            {operator = '==', params = array('-1', {}), expected = false},
+                            {operator = '==', params = array('-1', array(array())), expected = false},
+                            {operator = '==', params = array('-1', array(0)), expected = false},
+                            {operator = '==', params = array('-1', array(1)), expected = false},
+                            {operator = '==', params = array('-1', 0 / 0), expected = false},
+                            {operator = '==', params = array('', true), expected = false},
+                            {operator = '==', params = array('', false), expected = true},
+                            {operator = '==', params = array('', 1), expected = false},
+                            {operator = '==', params = array('', 0), expected = true},
+                            {operator = '==', params = array('', -1), expected = false},
+                            {operator = '==', params = array('', 'true'), expected = false},
+                            {operator = '==', params = array('', 'false'), expected = false},
+                            {operator = '==', params = array('', '1'), expected = false},
+                            {operator = '==', params = array('', '0'), expected = false},
+                            {operator = '==', params = array('', '-1'), expected = false},
+                            {operator = '==', params = array('', ''), expected = true},
+                            {operator = '==', params = array('', nil), expected = false},
+                            {operator = '==', params = array('', undefined), expected = false},
+                            {operator = '==', params = array('', 1 / 0), expected = false},
+                            {operator = '==', params = array('', -1 / 0), expected = false},
+                            {operator = '==', params = array('', array()), expected = true},
+                            {operator = '==', params = array('', {}), expected = false},
+                            {operator = '==', params = array('', array(array())), expected = true},
+                            {operator = '==', params = array('', array(0)), expected = false},
+                            {operator = '==', params = array('', array(1)), expected = false},
+                            {operator = '==', params = array('', 0 / 0), expected = false},
+                            {operator = '==', params = array(nil, true), expected = false},
+                            {operator = '==', params = array(nil, false), expected = false},
+                            {operator = '==', params = array(nil, 1), expected = false},
+                            {operator = '==', params = array(nil, 0), expected = false},
+                            {operator = '==', params = array(nil, -1), expected = false},
+                            {operator = '==', params = array(nil, 'true'), expected = false},
+                            {operator = '==', params = array(nil, 'false'), expected = false},
+                            {operator = '==', params = array(nil, '1'), expected = false},
+                            {operator = '==', params = array(nil, '0'), expected = false},
+                            {operator = '==', params = array(nil, '-1'), expected = false},
+                            {operator = '==', params = array(nil, ''), expected = false},
+                            {operator = '==', params = array(nil, nil), expected = true},
+                            {operator = '==', params = array(nil, undefined), expected = true},
+                            {operator = '==', params = array(nil, 1 / 0), expected = false},
+                            {operator = '==', params = array(nil, -1 / 0), expected = false},
+                            {operator = '==', params = array(nil, array()), expected = false},
+                            {operator = '==', params = array(nil, {}), expected = false},
+                            {operator = '==', params = array(nil, array(array())), expected = false},
+                            {operator = '==', params = array(nil, array(0)), expected = false},
+                            {operator = '==', params = array(nil, array(1)), expected = false},
+                            {operator = '==', params = array(nil, 0 / 0), expected = false},
+                            {operator = '==', params = array(undefined, true), expected = false},
+                            {operator = '==', params = array(undefined, false), expected = false},
+                            {operator = '==', params = array(undefined, 1), expected = false},
+                            {operator = '==', params = array(undefined, 0), expected = false},
+                            {operator = '==', params = array(undefined, -1), expected = false},
+                            {operator = '==', params = array(undefined, 'true'), expected = false},
+                            {operator = '==', params = array(undefined, 'false'), expected = false},
+                            {operator = '==', params = array(undefined, '1'), expected = false},
+                            {operator = '==', params = array(undefined, '0'), expected = false},
+                            {operator = '==', params = array(undefined, '-1'), expected = false},
+                            {operator = '==', params = array(undefined, ''), expected = false},
+                            {operator = '==', params = array(undefined, nil), expected = true},
+                            {operator = '==', params = array(undefined, undefined), expected = true},
+                            {operator = '==', params = array(undefined, 1 / 0), expected = false},
+                            {operator = '==', params = array(undefined, -1 / 0), expected = false},
+                            {operator = '==', params = array(undefined, array()), expected = false},
+                            {operator = '==', params = array(undefined, {}), expected = false},
+                            {operator = '==', params = array(undefined, array(array())), expected = false},
+                            {operator = '==', params = array(undefined, array(0)), expected = false},
+                            {operator = '==', params = array(undefined, array(1)), expected = false},
+                            {operator = '==', params = array(undefined, 0 / 0), expected = false},
+                            {operator = '==', params = array(1 / 0, true), expected = false},
+                            {operator = '==', params = array(1 / 0, false), expected = false},
+                            {operator = '==', params = array(1 / 0, 1), expected = false},
+                            {operator = '==', params = array(1 / 0, 0), expected = false},
+                            {operator = '==', params = array(1 / 0, -1), expected = false},
+                            {operator = '==', params = array(1 / 0, 'true'), expected = false},
+                            {operator = '==', params = array(1 / 0, 'false'), expected = false},
+                            {operator = '==', params = array(1 / 0, '1'), expected = false},
+                            {operator = '==', params = array(1 / 0, '0'), expected = false},
+                            {operator = '==', params = array(1 / 0, '-1'), expected = false},
+                            {operator = '==', params = array(1 / 0, ''), expected = false},
+                            {operator = '==', params = array(1 / 0, nil), expected = false},
+                            {operator = '==', params = array(1 / 0, undefined), expected = false},
+                            {operator = '==', params = array(1 / 0, 1 / 0), expected = true},
+                            {operator = '==', params = array(1 / 0, -1 / 0), expected = false},
+                            {operator = '==', params = array(1 / 0, array()), expected = false},
+                            {operator = '==', params = array(1 / 0, {}), expected = false},
+                            {operator = '==', params = array(1 / 0, array(array())), expected = false},
+                            {operator = '==', params = array(1 / 0, array(0)), expected = false},
+                            {operator = '==', params = array(1 / 0, array(1)), expected = false},
+                            {operator = '==', params = array(1 / 0, 0 / 0), expected = false},
+                            {operator = '==', params = array(-1 / 0, true), expected = false},
+                            {operator = '==', params = array(-1 / 0, false), expected = false},
+                            {operator = '==', params = array(-1 / 0, 1), expected = false},
+                            {operator = '==', params = array(-1 / 0, 0), expected = false},
+                            {operator = '==', params = array(-1 / 0, -1), expected = false},
+                            {operator = '==', params = array(-1 / 0, 'true'), expected = false},
+                            {operator = '==', params = array(-1 / 0, 'false'), expected = false},
+                            {operator = '==', params = array(-1 / 0, '1'), expected = false},
+                            {operator = '==', params = array(-1 / 0, '0'), expected = false},
+                            {operator = '==', params = array(-1 / 0, '-1'), expected = false},
+                            {operator = '==', params = array(-1 / 0, ''), expected = false},
+                            {operator = '==', params = array(-1 / 0, nil), expected = false},
+                            {operator = '==', params = array(-1 / 0, undefined), expected = false},
+                            {operator = '==', params = array(-1 / 0, 1 / 0), expected = false},
+                            {operator = '==', params = array(-1 / 0, -1 / 0), expected = true},
+                            {operator = '==', params = array(-1 / 0, array()), expected = false},
+                            {operator = '==', params = array(-1 / 0, {}), expected = false},
+                            {operator = '==', params = array(-1 / 0, array(array())), expected = false},
+                            {operator = '==', params = array(-1 / 0, array(0)), expected = false},
+                            {operator = '==', params = array(-1 / 0, array(1)), expected = false},
+                            {operator = '==', params = array(-1 / 0, 0 / 0), expected = false},
+                            {operator = '==', params = array(array(), true), expected = false},
+                            {operator = '==', params = array(array(), false), expected = true},
+                            {operator = '==', params = array(array(), 1), expected = false},
+                            {operator = '==', params = array(array(), 0), expected = true},
+                            {operator = '==', params = array(array(), -1), expected = false},
+                            {operator = '==', params = array(array(), 'true'), expected = false},
+                            {operator = '==', params = array(array(), 'false'), expected = false},
+                            {operator = '==', params = array(array(), '1'), expected = false},
+                            {operator = '==', params = array(array(), '0'), expected = false},
+                            {operator = '==', params = array(array(), '-1'), expected = false},
+                            {operator = '==', params = array(array(), ''), expected = true},
+                            {operator = '==', params = array(array(), nil), expected = false},
+                            {operator = '==', params = array(array(), undefined), expected = false},
+                            {operator = '==', params = array(array(), 1 / 0), expected = false},
+                            {operator = '==', params = array(array(), -1 / 0), expected = false},
+                            {operator = '==', params = array(array(), array()), expected = false},
+                            {operator = '==', params = array(array(), {}), expected = false},
+                            {operator = '==', params = array(array(), array(array())), expected = false},
+                            {operator = '==', params = array(array(), array(0)), expected = false},
+                            {operator = '==', params = array(array(), array(1)), expected = false},
+                            {operator = '==', params = array(array(), 0 / 0), expected = false},
+                            {operator = '==', params = array({}, true), expected = false},
+                            {operator = '==', params = array({}, false), expected = false},
+                            {operator = '==', params = array({}, 1), expected = false},
+                            {operator = '==', params = array({}, 0), expected = false},
+                            {operator = '==', params = array({}, -1), expected = false},
+                            {operator = '==', params = array({}, 'true'), expected = false},
+                            {operator = '==', params = array({}, 'false'), expected = false},
+                            {operator = '==', params = array({}, '1'), expected = false},
+                            {operator = '==', params = array({}, '0'), expected = false},
+                            {operator = '==', params = array({}, '-1'), expected = false},
+                            {operator = '==', params = array({}, ''), expected = false},
+                            {operator = '==', params = array({}, nil), expected = false},
+                            {operator = '==', params = array({}, undefined), expected = false},
+                            {operator = '==', params = array({}, 1 / 0), expected = false},
+                            {operator = '==', params = array({}, -1 / 0), expected = false},
+                            {operator = '==', params = array({}, array()), expected = false},
+                            {operator = '==', params = array({}, {}), expected = false},
+                            {operator = '==', params = array({}, array(array())), expected = false},
+                            {operator = '==', params = array({}, array(0)), expected = false},
+                            {operator = '==', params = array({}, array(1)), expected = false},
+                            {operator = '==', params = array({}, 0 / 0), expected = false},
+                            {operator = '==', params = array(array(array()), true), expected = false},
+                            {operator = '==', params = array(array(array()), false), expected = true},
+                            {operator = '==', params = array(array(array()), 1), expected = false},
+                            {operator = '==', params = array(array(array()), 0), expected = true},
+                            {operator = '==', params = array(array(array()), -1), expected = false},
+                            {operator = '==', params = array(array(array()), 'true'), expected = false},
+                            {operator = '==', params = array(array(array()), 'false'), expected = false},
+                            {operator = '==', params = array(array(array()), '1'), expected = false},
+                            {operator = '==', params = array(array(array()), '0'), expected = false},
+                            {operator = '==', params = array(array(array()), '-1'), expected = false},
+                            {operator = '==', params = array(array(array()), ''), expected = true},
+                            {operator = '==', params = array(array(array()), nil), expected = false},
+                            {operator = '==', params = array(array(array()), undefined), expected = false},
+                            {operator = '==', params = array(array(array()), 1 / 0), expected = false},
+                            {operator = '==', params = array(array(array()), -1 / 0), expected = false},
+                            {operator = '==', params = array(array(array()), array()), expected = false},
+                            {operator = '==', params = array(array(array()), {}), expected = false},
+                            {operator = '==', params = array(array(array()), array(array())), expected = false},
+                            {operator = '==', params = array(array(array()), array(0)), expected = false},
+                            {operator = '==', params = array(array(array()), array(1)), expected = false},
+                            {operator = '==', params = array(array(array()), 0 / 0), expected = false},
+                            {operator = '==', params = array(array(0), true), expected = false},
+                            {operator = '==', params = array(array(0), false), expected = true},
+                            {operator = '==', params = array(array(0), 1), expected = false},
+                            {operator = '==', params = array(array(0), 0), expected = true},
+                            {operator = '==', params = array(array(0), -1), expected = false},
+                            {operator = '==', params = array(array(0), 'true'), expected = false},
+                            {operator = '==', params = array(array(0), 'false'), expected = false},
+                            {operator = '==', params = array(array(0), '1'), expected = false},
+                            {operator = '==', params = array(array(0), '0'), expected = true},
+                            {operator = '==', params = array(array(0), '-1'), expected = false},
+                            {operator = '==', params = array(array(0), ''), expected = false},
+                            {operator = '==', params = array(array(0), nil), expected = false},
+                            {operator = '==', params = array(array(0), undefined), expected = false},
+                            {operator = '==', params = array(array(0), 1 / 0), expected = false},
+                            {operator = '==', params = array(array(0), -1 / 0), expected = false},
+                            {operator = '==', params = array(array(0), array()), expected = false},
+                            {operator = '==', params = array(array(0), {}), expected = false},
+                            {operator = '==', params = array(array(0), array(array())), expected = false},
+                            {operator = '==', params = array(array(0), array(0)), expected = false},
+                            {operator = '==', params = array(array(0), array(1)), expected = false},
+                            {operator = '==', params = array(array(0), 0 / 0), expected = false},
+                            {operator = '==', params = array(array(1), true), expected = true},
+                            {operator = '==', params = array(array(1), false), expected = false},
+                            {operator = '==', params = array(array(1), 1), expected = true},
+                            {operator = '==', params = array(array(1), 0), expected = false},
+                            {operator = '==', params = array(array(1), -1), expected = false},
+                            {operator = '==', params = array(array(1), 'true'), expected = false},
+                            {operator = '==', params = array(array(1), 'false'), expected = false},
+                            {operator = '==', params = array(array(1), '1'), expected = true},
+                            {operator = '==', params = array(array(1), '0'), expected = false},
+                            {operator = '==', params = array(array(1), '-1'), expected = false},
+                            {operator = '==', params = array(array(1), ''), expected = false},
+                            {operator = '==', params = array(array(1), nil), expected = false},
+                            {operator = '==', params = array(array(1), undefined), expected = false},
+                            {operator = '==', params = array(array(1), 1 / 0), expected = false},
+                            {operator = '==', params = array(array(1), -1 / 0), expected = false},
+                            {operator = '==', params = array(array(1), array()), expected = false},
+                            {operator = '==', params = array(array(1), {}), expected = false},
+                            {operator = '==', params = array(array(1), array(array())), expected = false},
+                            {operator = '==', params = array(array(1), array(0)), expected = false},
+                            {operator = '==', params = array(array(1), array(1)), expected = false},
+                            {operator = '==', params = array(array(1), 0 / 0), expected = false},
+                            {operator = '==', params = array(0 / 0, true), expected = false},
+                            {operator = '==', params = array(0 / 0, false), expected = false},
+                            {operator = '==', params = array(0 / 0, 1), expected = false},
+                            {operator = '==', params = array(0 / 0, 0), expected = false},
+                            {operator = '==', params = array(0 / 0, -1), expected = false},
+                            {operator = '==', params = array(0 / 0, 'true'), expected = false},
+                            {operator = '==', params = array(0 / 0, 'false'), expected = false},
+                            {operator = '==', params = array(0 / 0, '1'), expected = false},
+                            {operator = '==', params = array(0 / 0, '0'), expected = false},
+                            {operator = '==', params = array(0 / 0, '-1'), expected = false},
+                            {operator = '==', params = array(0 / 0, ''), expected = false},
+                            {operator = '==', params = array(0 / 0, nil), expected = false},
+                            {operator = '==', params = array(0 / 0, undefined), expected = false},
+                            {operator = '==', params = array(0 / 0, 1 / 0), expected = false},
+                            {operator = '==', params = array(0 / 0, -1 / 0), expected = false},
+                            {operator = '==', params = array(0 / 0, array()), expected = false},
+                            {operator = '==', params = array(0 / 0, {}), expected = false},
+                            {operator = '==', params = array(0 / 0, array(array())), expected = false},
+                            {operator = '==', params = array(0 / 0, array(0)), expected = false},
+                            {operator = '==', params = array(0 / 0, array(1)), expected = false},
+                            {operator = '==', params = array(0 / 0, 0 / 0), expected = false}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    "should return result of loose inequality evaluation when using '!=' operator",
+                    function()
+                        local test_table = {
+                            {operator = '!=', params = array(true, true), expected = false},
+                            {operator = '!=', params = array(true, false), expected = true},
+                            {operator = '!=', params = array(true, 1), expected = false},
+                            {operator = '!=', params = array(true, 0), expected = true},
+                            {operator = '!=', params = array(true, -1), expected = true},
+                            {operator = '!=', params = array(true, 'true'), expected = true},
+                            {operator = '!=', params = array(true, 'false'), expected = true},
+                            {operator = '!=', params = array(true, '1'), expected = false},
+                            {operator = '!=', params = array(true, '0'), expected = true},
+                            {operator = '!=', params = array(true, '-1'), expected = true},
+                            {operator = '!=', params = array(true, ''), expected = true},
+                            {operator = '!=', params = array(true, nil), expected = true},
+                            {operator = '!=', params = array(true, undefined), expected = true},
+                            {operator = '!=', params = array(true, 1 / 0), expected = true},
+                            {operator = '!=', params = array(true, -1 / 0), expected = true},
+                            {operator = '!=', params = array(true, array()), expected = true},
+                            {operator = '!=', params = array(true, {}), expected = true},
+                            {operator = '!=', params = array(true, array(array())), expected = true},
+                            {operator = '!=', params = array(true, array(0)), expected = true},
+                            {operator = '!=', params = array(true, array(1)), expected = false},
+                            {operator = '!=', params = array(true, 0 / 0), expected = true},
+                            {operator = '!=', params = array(false, true), expected = true},
+                            {operator = '!=', params = array(false, false), expected = false},
+                            {operator = '!=', params = array(false, 1), expected = true},
+                            {operator = '!=', params = array(false, 0), expected = false},
+                            {operator = '!=', params = array(false, -1), expected = true},
+                            {operator = '!=', params = array(false, 'true'), expected = true},
+                            {operator = '!=', params = array(false, 'false'), expected = true},
+                            {operator = '!=', params = array(false, '1'), expected = true},
+                            {operator = '!=', params = array(false, '0'), expected = false},
+                            {operator = '!=', params = array(false, '-1'), expected = true},
+                            {operator = '!=', params = array(false, ''), expected = false},
+                            {operator = '!=', params = array(false, nil), expected = true},
+                            {operator = '!=', params = array(false, undefined), expected = true},
+                            {operator = '!=', params = array(false, 1 / 0), expected = true},
+                            {operator = '!=', params = array(false, -1 / 0), expected = true},
+                            {operator = '!=', params = array(false, array()), expected = false},
+                            {operator = '!=', params = array(false, {}), expected = true},
+                            {operator = '!=', params = array(false, array(array())), expected = false},
+                            {operator = '!=', params = array(false, array(0)), expected = false},
+                            {operator = '!=', params = array(false, array(1)), expected = true},
+                            {operator = '!=', params = array(false, 0 / 0), expected = true},
+                            {operator = '!=', params = array(1, true), expected = false},
+                            {operator = '!=', params = array(1, false), expected = true},
+                            {operator = '!=', params = array(1, 1), expected = false},
+                            {operator = '!=', params = array(1, 0), expected = true},
+                            {operator = '!=', params = array(1, -1), expected = true},
+                            {operator = '!=', params = array(1, 'true'), expected = true},
+                            {operator = '!=', params = array(1, 'false'), expected = true},
+                            {operator = '!=', params = array(1, '1'), expected = false},
+                            {operator = '!=', params = array(1, '0'), expected = true},
+                            {operator = '!=', params = array(1, '-1'), expected = true},
+                            {operator = '!=', params = array(1, ''), expected = true},
+                            {operator = '!=', params = array(1, nil), expected = true},
+                            {operator = '!=', params = array(1, undefined), expected = true},
+                            {operator = '!=', params = array(1, 1 / 0), expected = true},
+                            {operator = '!=', params = array(1, -1 / 0), expected = true},
+                            {operator = '!=', params = array(1, array()), expected = true},
+                            {operator = '!=', params = array(1, {}), expected = true},
+                            {operator = '!=', params = array(1, array(array())), expected = true},
+                            {operator = '!=', params = array(1, array(0)), expected = true},
+                            {operator = '!=', params = array(1, array(1)), expected = false},
+                            {operator = '!=', params = array(1, 0 / 0), expected = true},
+                            {operator = '!=', params = array(0, true), expected = true},
+                            {operator = '!=', params = array(0, false), expected = false},
+                            {operator = '!=', params = array(0, 1), expected = true},
+                            {operator = '!=', params = array(0, 0), expected = false},
+                            {operator = '!=', params = array(0, -1), expected = true},
+                            {operator = '!=', params = array(0, 'true'), expected = true},
+                            {operator = '!=', params = array(0, 'false'), expected = true},
+                            {operator = '!=', params = array(0, '1'), expected = true},
+                            {operator = '!=', params = array(0, '0'), expected = false},
+                            {operator = '!=', params = array(0, '-1'), expected = true},
+                            {operator = '!=', params = array(0, ''), expected = false},
+                            {operator = '!=', params = array(0, nil), expected = true},
+                            {operator = '!=', params = array(0, undefined), expected = true},
+                            {operator = '!=', params = array(0, 1 / 0), expected = true},
+                            {operator = '!=', params = array(0, -1 / 0), expected = true},
+                            {operator = '!=', params = array(0, array()), expected = false},
+                            {operator = '!=', params = array(0, {}), expected = true},
+                            {operator = '!=', params = array(0, array(array())), expected = false},
+                            {operator = '!=', params = array(0, array(0)), expected = false},
+                            {operator = '!=', params = array(0, array(1)), expected = true},
+                            {operator = '!=', params = array(0, 0 / 0), expected = true},
+                            {operator = '!=', params = array(-1, true), expected = true},
+                            {operator = '!=', params = array(-1, false), expected = true},
+                            {operator = '!=', params = array(-1, 1), expected = true},
+                            {operator = '!=', params = array(-1, 0), expected = true},
+                            {operator = '!=', params = array(-1, -1), expected = false},
+                            {operator = '!=', params = array(-1, 'true'), expected = true},
+                            {operator = '!=', params = array(-1, 'false'), expected = true},
+                            {operator = '!=', params = array(-1, '1'), expected = true},
+                            {operator = '!=', params = array(-1, '0'), expected = true},
+                            {operator = '!=', params = array(-1, '-1'), expected = false},
+                            {operator = '!=', params = array(-1, ''), expected = true},
+                            {operator = '!=', params = array(-1, nil), expected = true},
+                            {operator = '!=', params = array(-1, undefined), expected = true},
+                            {operator = '!=', params = array(-1, 1 / 0), expected = true},
+                            {operator = '!=', params = array(-1, -1 / 0), expected = true},
+                            {operator = '!=', params = array(-1, array()), expected = true},
+                            {operator = '!=', params = array(-1, {}), expected = true},
+                            {operator = '!=', params = array(-1, array(array())), expected = true},
+                            {operator = '!=', params = array(-1, array(0)), expected = true},
+                            {operator = '!=', params = array(-1, array(1)), expected = true},
+                            {operator = '!=', params = array(-1, 0 / 0), expected = true},
+                            {operator = '!=', params = array('true', true), expected = true},
+                            {operator = '!=', params = array('true', false), expected = true},
+                            {operator = '!=', params = array('true', 1), expected = true},
+                            {operator = '!=', params = array('true', 0), expected = true},
+                            {operator = '!=', params = array('true', -1), expected = true},
+                            {operator = '!=', params = array('true', 'true'), expected = false},
+                            {operator = '!=', params = array('true', 'false'), expected = true},
+                            {operator = '!=', params = array('true', '1'), expected = true},
+                            {operator = '!=', params = array('true', '0'), expected = true},
+                            {operator = '!=', params = array('true', '-1'), expected = true},
+                            {operator = '!=', params = array('true', ''), expected = true},
+                            {operator = '!=', params = array('true', nil), expected = true},
+                            {operator = '!=', params = array('true', undefined), expected = true},
+                            {operator = '!=', params = array('true', 1 / 0), expected = true},
+                            {operator = '!=', params = array('true', -1 / 0), expected = true},
+                            {operator = '!=', params = array('true', array()), expected = true},
+                            {operator = '!=', params = array('true', {}), expected = true},
+                            {operator = '!=', params = array('true', array(array())), expected = true},
+                            {operator = '!=', params = array('true', array(0)), expected = true},
+                            {operator = '!=', params = array('true', array(1)), expected = true},
+                            {operator = '!=', params = array('true', 0 / 0), expected = true},
+                            {operator = '!=', params = array('false', true), expected = true},
+                            {operator = '!=', params = array('false', false), expected = true},
+                            {operator = '!=', params = array('false', 1), expected = true},
+                            {operator = '!=', params = array('false', 0), expected = true},
+                            {operator = '!=', params = array('false', -1), expected = true},
+                            {operator = '!=', params = array('false', 'true'), expected = true},
+                            {operator = '!=', params = array('false', 'false'), expected = false},
+                            {operator = '!=', params = array('false', '1'), expected = true},
+                            {operator = '!=', params = array('false', '0'), expected = true},
+                            {operator = '!=', params = array('false', '-1'), expected = true},
+                            {operator = '!=', params = array('false', ''), expected = true},
+                            {operator = '!=', params = array('false', nil), expected = true},
+                            {operator = '!=', params = array('false', undefined), expected = true},
+                            {operator = '!=', params = array('false', 1 / 0), expected = true},
+                            {operator = '!=', params = array('false', -1 / 0), expected = true},
+                            {operator = '!=', params = array('false', array()), expected = true},
+                            {operator = '!=', params = array('false', {}), expected = true},
+                            {operator = '!=', params = array('false', array(array())), expected = true},
+                            {operator = '!=', params = array('false', array(0)), expected = true},
+                            {operator = '!=', params = array('false', array(1)), expected = true},
+                            {operator = '!=', params = array('false', 0 / 0), expected = true},
+                            {operator = '!=', params = array('1', true), expected = false},
+                            {operator = '!=', params = array('1', false), expected = true},
+                            {operator = '!=', params = array('1', 1), expected = false},
+                            {operator = '!=', params = array('1', 0), expected = true},
+                            {operator = '!=', params = array('1', -1), expected = true},
+                            {operator = '!=', params = array('1', 'true'), expected = true},
+                            {operator = '!=', params = array('1', 'false'), expected = true},
+                            {operator = '!=', params = array('1', '1'), expected = false},
+                            {operator = '!=', params = array('1', '0'), expected = true},
+                            {operator = '!=', params = array('1', '-1'), expected = true},
+                            {operator = '!=', params = array('1', ''), expected = true},
+                            {operator = '!=', params = array('1', nil), expected = true},
+                            {operator = '!=', params = array('1', undefined), expected = true},
+                            {operator = '!=', params = array('1', 1 / 0), expected = true},
+                            {operator = '!=', params = array('1', -1 / 0), expected = true},
+                            {operator = '!=', params = array('1', array()), expected = true},
+                            {operator = '!=', params = array('1', {}), expected = true},
+                            {operator = '!=', params = array('1', array(array())), expected = true},
+                            {operator = '!=', params = array('1', array(0)), expected = true},
+                            {operator = '!=', params = array('1', array(1)), expected = false},
+                            {operator = '!=', params = array('1', 0 / 0), expected = true},
+                            {operator = '!=', params = array('0', true), expected = true},
+                            {operator = '!=', params = array('0', false), expected = false},
+                            {operator = '!=', params = array('0', 1), expected = true},
+                            {operator = '!=', params = array('0', 0), expected = false},
+                            {operator = '!=', params = array('0', -1), expected = true},
+                            {operator = '!=', params = array('0', 'true'), expected = true},
+                            {operator = '!=', params = array('0', 'false'), expected = true},
+                            {operator = '!=', params = array('0', '1'), expected = true},
+                            {operator = '!=', params = array('0', '0'), expected = false},
+                            {operator = '!=', params = array('0', '-1'), expected = true},
+                            {operator = '!=', params = array('0', ''), expected = true},
+                            {operator = '!=', params = array('0', nil), expected = true},
+                            {operator = '!=', params = array('0', undefined), expected = true},
+                            {operator = '!=', params = array('0', 1 / 0), expected = true},
+                            {operator = '!=', params = array('0', -1 / 0), expected = true},
+                            {operator = '!=', params = array('0', array()), expected = true},
+                            {operator = '!=', params = array('0', {}), expected = true},
+                            {operator = '!=', params = array('0', array(array())), expected = true},
+                            {operator = '!=', params = array('0', array(0)), expected = false},
+                            {operator = '!=', params = array('0', array(1)), expected = true},
+                            {operator = '!=', params = array('0', 0 / 0), expected = true},
+                            {operator = '!=', params = array('-1', true), expected = true},
+                            {operator = '!=', params = array('-1', false), expected = true},
+                            {operator = '!=', params = array('-1', 1), expected = true},
+                            {operator = '!=', params = array('-1', 0), expected = true},
+                            {operator = '!=', params = array('-1', -1), expected = false},
+                            {operator = '!=', params = array('-1', 'true'), expected = true},
+                            {operator = '!=', params = array('-1', 'false'), expected = true},
+                            {operator = '!=', params = array('-1', '1'), expected = true},
+                            {operator = '!=', params = array('-1', '0'), expected = true},
+                            {operator = '!=', params = array('-1', '-1'), expected = false},
+                            {operator = '!=', params = array('-1', ''), expected = true},
+                            {operator = '!=', params = array('-1', nil), expected = true},
+                            {operator = '!=', params = array('-1', undefined), expected = true},
+                            {operator = '!=', params = array('-1', 1 / 0), expected = true},
+                            {operator = '!=', params = array('-1', -1 / 0), expected = true},
+                            {operator = '!=', params = array('-1', array()), expected = true},
+                            {operator = '!=', params = array('-1', {}), expected = true},
+                            {operator = '!=', params = array('-1', array(array())), expected = true},
+                            {operator = '!=', params = array('-1', array(0)), expected = true},
+                            {operator = '!=', params = array('-1', array(1)), expected = true},
+                            {operator = '!=', params = array('-1', 0 / 0), expected = true},
+                            {operator = '!=', params = array('', true), expected = true},
+                            {operator = '!=', params = array('', false), expected = false},
+                            {operator = '!=', params = array('', 1), expected = true},
+                            {operator = '!=', params = array('', 0), expected = false},
+                            {operator = '!=', params = array('', -1), expected = true},
+                            {operator = '!=', params = array('', 'true'), expected = true},
+                            {operator = '!=', params = array('', 'false'), expected = true},
+                            {operator = '!=', params = array('', '1'), expected = true},
+                            {operator = '!=', params = array('', '0'), expected = true},
+                            {operator = '!=', params = array('', '-1'), expected = true},
+                            {operator = '!=', params = array('', ''), expected = false},
+                            {operator = '!=', params = array('', nil), expected = true},
+                            {operator = '!=', params = array('', undefined), expected = true},
+                            {operator = '!=', params = array('', 1 / 0), expected = true},
+                            {operator = '!=', params = array('', -1 / 0), expected = true},
+                            {operator = '!=', params = array('', array()), expected = false},
+                            {operator = '!=', params = array('', {}), expected = true},
+                            {operator = '!=', params = array('', array(array())), expected = false},
+                            {operator = '!=', params = array('', array(0)), expected = true},
+                            {operator = '!=', params = array('', array(1)), expected = true},
+                            {operator = '!=', params = array('', 0 / 0), expected = true},
+                            {operator = '!=', params = array(nil, true), expected = true},
+                            {operator = '!=', params = array(nil, false), expected = true},
+                            {operator = '!=', params = array(nil, 1), expected = true},
+                            {operator = '!=', params = array(nil, 0), expected = true},
+                            {operator = '!=', params = array(nil, -1), expected = true},
+                            {operator = '!=', params = array(nil, 'true'), expected = true},
+                            {operator = '!=', params = array(nil, 'false'), expected = true},
+                            {operator = '!=', params = array(nil, '1'), expected = true},
+                            {operator = '!=', params = array(nil, '0'), expected = true},
+                            {operator = '!=', params = array(nil, '-1'), expected = true},
+                            {operator = '!=', params = array(nil, ''), expected = true},
+                            {operator = '!=', params = array(nil, nil), expected = false},
+                            {operator = '!=', params = array(nil, undefined), expected = false},
+                            {operator = '!=', params = array(nil, 1 / 0), expected = true},
+                            {operator = '!=', params = array(nil, -1 / 0), expected = true},
+                            {operator = '!=', params = array(nil, array()), expected = true},
+                            {operator = '!=', params = array(nil, {}), expected = true},
+                            {operator = '!=', params = array(nil, array(array())), expected = true},
+                            {operator = '!=', params = array(nil, array(0)), expected = true},
+                            {operator = '!=', params = array(nil, array(1)), expected = true},
+                            {operator = '!=', params = array(nil, 0 / 0), expected = true},
+                            {operator = '!=', params = array(undefined, true), expected = true},
+                            {operator = '!=', params = array(undefined, false), expected = true},
+                            {operator = '!=', params = array(undefined, 1), expected = true},
+                            {operator = '!=', params = array(undefined, 0), expected = true},
+                            {operator = '!=', params = array(undefined, -1), expected = true},
+                            {operator = '!=', params = array(undefined, 'true'), expected = true},
+                            {operator = '!=', params = array(undefined, 'false'), expected = true},
+                            {operator = '!=', params = array(undefined, '1'), expected = true},
+                            {operator = '!=', params = array(undefined, '0'), expected = true},
+                            {operator = '!=', params = array(undefined, '-1'), expected = true},
+                            {operator = '!=', params = array(undefined, ''), expected = true},
+                            {operator = '!=', params = array(undefined, nil), expected = false},
+                            {operator = '!=', params = array(undefined, undefined), expected = false},
+                            {operator = '!=', params = array(undefined, 1 / 0), expected = true},
+                            {operator = '!=', params = array(undefined, -1 / 0), expected = true},
+                            {operator = '!=', params = array(undefined, array()), expected = true},
+                            {operator = '!=', params = array(undefined, {}), expected = true},
+                            {operator = '!=', params = array(undefined, array(array())), expected = true},
+                            {operator = '!=', params = array(undefined, array(0)), expected = true},
+                            {operator = '!=', params = array(undefined, array(1)), expected = true},
+                            {operator = '!=', params = array(undefined, 0 / 0), expected = true},
+                            {operator = '!=', params = array(1 / 0, true), expected = true},
+                            {operator = '!=', params = array(1 / 0, false), expected = true},
+                            {operator = '!=', params = array(1 / 0, 1), expected = true},
+                            {operator = '!=', params = array(1 / 0, 0), expected = true},
+                            {operator = '!=', params = array(1 / 0, -1), expected = true},
+                            {operator = '!=', params = array(1 / 0, 'true'), expected = true},
+                            {operator = '!=', params = array(1 / 0, 'false'), expected = true},
+                            {operator = '!=', params = array(1 / 0, '1'), expected = true},
+                            {operator = '!=', params = array(1 / 0, '0'), expected = true},
+                            {operator = '!=', params = array(1 / 0, '-1'), expected = true},
+                            {operator = '!=', params = array(1 / 0, ''), expected = true},
+                            {operator = '!=', params = array(1 / 0, nil), expected = true},
+                            {operator = '!=', params = array(1 / 0, undefined), expected = true},
+                            {operator = '!=', params = array(1 / 0, 1 / 0), expected = false},
+                            {operator = '!=', params = array(1 / 0, -1 / 0), expected = true},
+                            {operator = '!=', params = array(1 / 0, array()), expected = true},
+                            {operator = '!=', params = array(1 / 0, {}), expected = true},
+                            {operator = '!=', params = array(1 / 0, array(array())), expected = true},
+                            {operator = '!=', params = array(1 / 0, array(0)), expected = true},
+                            {operator = '!=', params = array(1 / 0, array(1)), expected = true},
+                            {operator = '!=', params = array(1 / 0, 0 / 0), expected = true},
+                            {operator = '!=', params = array(-1 / 0, true), expected = true},
+                            {operator = '!=', params = array(-1 / 0, false), expected = true},
+                            {operator = '!=', params = array(-1 / 0, 1), expected = true},
+                            {operator = '!=', params = array(-1 / 0, 0), expected = true},
+                            {operator = '!=', params = array(-1 / 0, -1), expected = true},
+                            {operator = '!=', params = array(-1 / 0, 'true'), expected = true},
+                            {operator = '!=', params = array(-1 / 0, 'false'), expected = true},
+                            {operator = '!=', params = array(-1 / 0, '1'), expected = true},
+                            {operator = '!=', params = array(-1 / 0, '0'), expected = true},
+                            {operator = '!=', params = array(-1 / 0, '-1'), expected = true},
+                            {operator = '!=', params = array(-1 / 0, ''), expected = true},
+                            {operator = '!=', params = array(-1 / 0, nil), expected = true},
+                            {operator = '!=', params = array(-1 / 0, undefined), expected = true},
+                            {operator = '!=', params = array(-1 / 0, 1 / 0), expected = true},
+                            {operator = '!=', params = array(-1 / 0, -1 / 0), expected = false},
+                            {operator = '!=', params = array(-1 / 0, array()), expected = true},
+                            {operator = '!=', params = array(-1 / 0, {}), expected = true},
+                            {operator = '!=', params = array(-1 / 0, array(array())), expected = true},
+                            {operator = '!=', params = array(-1 / 0, array(0)), expected = true},
+                            {operator = '!=', params = array(-1 / 0, array(1)), expected = true},
+                            {operator = '!=', params = array(-1 / 0, 0 / 0), expected = true},
+                            {operator = '!=', params = array(array(), true), expected = true},
+                            {operator = '!=', params = array(array(), false), expected = false},
+                            {operator = '!=', params = array(array(), 1), expected = true},
+                            {operator = '!=', params = array(array(), 0), expected = false},
+                            {operator = '!=', params = array(array(), -1), expected = true},
+                            {operator = '!=', params = array(array(), 'true'), expected = true},
+                            {operator = '!=', params = array(array(), 'false'), expected = true},
+                            {operator = '!=', params = array(array(), '1'), expected = true},
+                            {operator = '!=', params = array(array(), '0'), expected = true},
+                            {operator = '!=', params = array(array(), '-1'), expected = true},
+                            {operator = '!=', params = array(array(), ''), expected = false},
+                            {operator = '!=', params = array(array(), nil), expected = true},
+                            {operator = '!=', params = array(array(), undefined), expected = true},
+                            {operator = '!=', params = array(array(), 1 / 0), expected = true},
+                            {operator = '!=', params = array(array(), -1 / 0), expected = true},
+                            {operator = '!=', params = array(array(), array()), expected = true},
+                            {operator = '!=', params = array(array(), {}), expected = true},
+                            {operator = '!=', params = array(array(), array(array())), expected = true},
+                            {operator = '!=', params = array(array(), array(0)), expected = true},
+                            {operator = '!=', params = array(array(), array(1)), expected = true},
+                            {operator = '!=', params = array(array(), 0 / 0), expected = true},
+                            {operator = '!=', params = array({}, true), expected = true},
+                            {operator = '!=', params = array({}, false), expected = true},
+                            {operator = '!=', params = array({}, 1), expected = true},
+                            {operator = '!=', params = array({}, 0), expected = true},
+                            {operator = '!=', params = array({}, -1), expected = true},
+                            {operator = '!=', params = array({}, 'true'), expected = true},
+                            {operator = '!=', params = array({}, 'false'), expected = true},
+                            {operator = '!=', params = array({}, '1'), expected = true},
+                            {operator = '!=', params = array({}, '0'), expected = true},
+                            {operator = '!=', params = array({}, '-1'), expected = true},
+                            {operator = '!=', params = array({}, ''), expected = true},
+                            {operator = '!=', params = array({}, nil), expected = true},
+                            {operator = '!=', params = array({}, undefined), expected = true},
+                            {operator = '!=', params = array({}, 1 / 0), expected = true},
+                            {operator = '!=', params = array({}, -1 / 0), expected = true},
+                            {operator = '!=', params = array({}, array()), expected = true},
+                            {operator = '!=', params = array({}, {}), expected = true},
+                            {operator = '!=', params = array({}, array(array())), expected = true},
+                            {operator = '!=', params = array({}, array(0)), expected = true},
+                            {operator = '!=', params = array({}, array(1)), expected = true},
+                            {operator = '!=', params = array({}, 0 / 0), expected = true},
+                            {operator = '!=', params = array(array(array()), true), expected = true},
+                            {operator = '!=', params = array(array(array()), false), expected = false},
+                            {operator = '!=', params = array(array(array()), 1), expected = true},
+                            {operator = '!=', params = array(array(array()), 0), expected = false},
+                            {operator = '!=', params = array(array(array()), -1), expected = true},
+                            {operator = '!=', params = array(array(array()), 'true'), expected = true},
+                            {operator = '!=', params = array(array(array()), 'false'), expected = true},
+                            {operator = '!=', params = array(array(array()), '1'), expected = true},
+                            {operator = '!=', params = array(array(array()), '0'), expected = true},
+                            {operator = '!=', params = array(array(array()), '-1'), expected = true},
+                            {operator = '!=', params = array(array(array()), ''), expected = false},
+                            {operator = '!=', params = array(array(array()), nil), expected = true},
+                            {operator = '!=', params = array(array(array()), undefined), expected = true},
+                            {operator = '!=', params = array(array(array()), 1 / 0), expected = true},
+                            {operator = '!=', params = array(array(array()), -1 / 0), expected = true},
+                            {operator = '!=', params = array(array(array()), array()), expected = true},
+                            {operator = '!=', params = array(array(array()), {}), expected = true},
+                            {operator = '!=', params = array(array(array()), array(array())), expected = true},
+                            {operator = '!=', params = array(array(array()), array(0)), expected = true},
+                            {operator = '!=', params = array(array(array()), array(1)), expected = true},
+                            {operator = '!=', params = array(array(array()), 0 / 0), expected = true},
+                            {operator = '!=', params = array(array(0), true), expected = true},
+                            {operator = '!=', params = array(array(0), false), expected = false},
+                            {operator = '!=', params = array(array(0), 1), expected = true},
+                            {operator = '!=', params = array(array(0), 0), expected = false},
+                            {operator = '!=', params = array(array(0), -1), expected = true},
+                            {operator = '!=', params = array(array(0), 'true'), expected = true},
+                            {operator = '!=', params = array(array(0), 'false'), expected = true},
+                            {operator = '!=', params = array(array(0), '1'), expected = true},
+                            {operator = '!=', params = array(array(0), '0'), expected = false},
+                            {operator = '!=', params = array(array(0), '-1'), expected = true},
+                            {operator = '!=', params = array(array(0), ''), expected = true},
+                            {operator = '!=', params = array(array(0), nil), expected = true},
+                            {operator = '!=', params = array(array(0), undefined), expected = true},
+                            {operator = '!=', params = array(array(0), 1 / 0), expected = true},
+                            {operator = '!=', params = array(array(0), -1 / 0), expected = true},
+                            {operator = '!=', params = array(array(0), array()), expected = true},
+                            {operator = '!=', params = array(array(0), {}), expected = true},
+                            {operator = '!=', params = array(array(0), array(array())), expected = true},
+                            {operator = '!=', params = array(array(0), array(0)), expected = true},
+                            {operator = '!=', params = array(array(0), array(1)), expected = true},
+                            {operator = '!=', params = array(array(0), 0 / 0), expected = true},
+                            {operator = '!=', params = array(array(1), true), expected = false},
+                            {operator = '!=', params = array(array(1), false), expected = true},
+                            {operator = '!=', params = array(array(1), 1), expected = false},
+                            {operator = '!=', params = array(array(1), 0), expected = true},
+                            {operator = '!=', params = array(array(1), -1), expected = true},
+                            {operator = '!=', params = array(array(1), 'true'), expected = true},
+                            {operator = '!=', params = array(array(1), 'false'), expected = true},
+                            {operator = '!=', params = array(array(1), '1'), expected = false},
+                            {operator = '!=', params = array(array(1), '0'), expected = true},
+                            {operator = '!=', params = array(array(1), '-1'), expected = true},
+                            {operator = '!=', params = array(array(1), ''), expected = true},
+                            {operator = '!=', params = array(array(1), nil), expected = true},
+                            {operator = '!=', params = array(array(1), undefined), expected = true},
+                            {operator = '!=', params = array(array(1), 1 / 0), expected = true},
+                            {operator = '!=', params = array(array(1), -1 / 0), expected = true},
+                            {operator = '!=', params = array(array(1), array()), expected = true},
+                            {operator = '!=', params = array(array(1), {}), expected = true},
+                            {operator = '!=', params = array(array(1), array(array())), expected = true},
+                            {operator = '!=', params = array(array(1), array(0)), expected = true},
+                            {operator = '!=', params = array(array(1), array(1)), expected = true},
+                            {operator = '!=', params = array(array(1), 0 / 0), expected = true},
+                            {operator = '!=', params = array(0 / 0, true), expected = true},
+                            {operator = '!=', params = array(0 / 0, false), expected = true},
+                            {operator = '!=', params = array(0 / 0, 1), expected = true},
+                            {operator = '!=', params = array(0 / 0, 0), expected = true},
+                            {operator = '!=', params = array(0 / 0, -1), expected = true},
+                            {operator = '!=', params = array(0 / 0, 'true'), expected = true},
+                            {operator = '!=', params = array(0 / 0, 'false'), expected = true},
+                            {operator = '!=', params = array(0 / 0, '1'), expected = true},
+                            {operator = '!=', params = array(0 / 0, '0'), expected = true},
+                            {operator = '!=', params = array(0 / 0, '-1'), expected = true},
+                            {operator = '!=', params = array(0 / 0, ''), expected = true},
+                            {operator = '!=', params = array(0 / 0, nil), expected = true},
+                            {operator = '!=', params = array(0 / 0, undefined), expected = true},
+                            {operator = '!=', params = array(0 / 0, 1 / 0), expected = true},
+                            {operator = '!=', params = array(0 / 0, -1 / 0), expected = true},
+                            {operator = '!=', params = array(0 / 0, array()), expected = true},
+                            {operator = '!=', params = array(0 / 0, {}), expected = true},
+                            {operator = '!=', params = array(0 / 0, array(array())), expected = true},
+                            {operator = '!=', params = array(0 / 0, array(0)), expected = true},
+                            {operator = '!=', params = array(0 / 0, array(1)), expected = true},
+                            {operator = '!=', params = array(0 / 0, 0 / 0), expected = true}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    "should return result of strict equality evaluation when using '===' operator",
+                    function()
+                        local test_table = {
+                            {operator = '===', params = array(true, true), expected = true},
+                            {operator = '===', params = array(true, 1), expected = false},
+                            {operator = '===', params = array(false, false), expected = true},
+                            {operator = '===', params = array(false, 0), expected = false},
+                            {operator = '===', params = array(false, ''), expected = false},
+                            {operator = '===', params = array(1, '1'), expected = false},
+                            {operator = '===', params = array(0, '0'), expected = false},
+                            {operator = '===', params = array(0, array()), expected = false},
+                            {operator = '===', params = array(0, array(0)), expected = false},
+                            {operator = '===', params = array(array(), array()), expected = false}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    "should return result of strict inequality evaluation when using '!==' operator",
+                    function()
+                        local test_table = {
+                            {operator = '!==', params = array(true, true), expected = false},
+                            {operator = '!==', params = array(true, 1), expected = true},
+                            {operator = '!==', params = array(false, false), expected = false},
+                            {operator = '!==', params = array(false, 0), expected = true},
+                            {operator = '!==', params = array(false, ''), expected = true},
+                            {operator = '!==', params = array(1, '1'), expected = true},
+                            {operator = '!==', params = array(0, '0'), expected = true},
+                            {operator = '!==', params = array(0, array()), expected = true},
+                            {operator = '!==', params = array(0, array(0)), expected = true},
+                            {operator = '!==', params = array(array(), array()), expected = true}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+        describe(
+            'given one item',
+            function()
+                it(
+                    "should return the negation of the item when using '!' operator",
+                    function()
+                        local test_table = {
+                            {operator = '!', params = array(false), expected = true},
+                            {operator = '!', params = array(nil), expected = true},
+                            {operator = '!', params = array(undefined), expected = true},
+                            {operator = '!', params = array(0), expected = true},
+                            {operator = '!', params = array(''), expected = true},
+                            {operator = '!', params = array(0 / 0), expected = true},
+                            {operator = '!', params = array(undefined), expected = true},
+                            {operator = '!', params = array('0'), expected = false},
+                            {operator = '!', params = array(true), expected = false},
+                            {operator = '!', params = array(1), expected = false},
+                            {operator = '!', params = array(-1), expected = false},
+                            {operator = '!', params = array('true'), expected = false},
+                            {operator = '!', params = array('false'), expected = false},
+                            {operator = '!', params = array('1'), expected = false},
+                            {operator = '!', params = array('-1'), expected = false},
+                            {operator = '!', params = array(1 / 0), expected = false},
+                            {operator = '!', params = array(-1 / 0), expected = false},
+                            {operator = '!', params = array(array()), expected = false},
+                            {operator = '!', params = array({}), expected = false}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+                it(
+                    "should return the double negation of the item when using '!!' operator",
+                    function()
+                        local test_table = {
+                            {operator = '!!', params = array(false), expected = false},
+                            {operator = '!!', params = array(nil), expected = false},
+                            {operator = '!!', params = array(undefined), expected = false},
+                            {operator = '!!', params = array(0), expected = false},
+                            {operator = '!!', params = array(''), expected = false},
+                            {operator = '!!', params = array(0 / 0), expected = false},
+                            {operator = '!!', params = array(undefined), expected = false},
+                            {operator = '!!', params = array('0'), expected = true},
+                            {operator = '!!', params = array(true), expected = true},
+                            {operator = '!!', params = array(1), expected = true},
+                            {operator = '!!', params = array(-1), expected = true},
+                            {operator = '!!', params = array('true'), expected = true},
+                            {operator = '!!', params = array('false'), expected = true},
+                            {operator = '!!', params = array('1'), expected = true},
+                            {operator = '!!', params = array('-1'), expected = true},
+                            {operator = '!!', params = array(1 / 0), expected = true},
+                            {operator = '!!', params = array(-1 / 0), expected = true},
+                            {operator = '!!', params = array(array()), expected = true},
+                            {operator = '!!', params = array({}), expected = true}
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    'json-logic operation test',
+    function()
+        describe(
+            'given unregistered operation',
+            function()
+                local test_table = {
+                    {logic = {echo = array(1, 2, 3)}},
+                    {logic = {first = array(1, 2, 3)}}
                 }
-            }
-            logic_test(test_table)
-        end)
-    end)
-end)
+                it(
+                    'should return the original logic',
+                    function()
+                        for i, t in ipairs(test_table) do
+                            local res = logic_apply(t.logic, nil)
+                            assert.message('failed at index: ' .. i).are.equal(t.logic, res)
+                        end
+                    end
+                )
+            end
+        )
+
+        describe(
+            'given new operation to be registered',
+            function()
+                local test_table = {
+                    {
+                        new_op_name = 'echo',
+                        new_op = function(_, ...)
+                            local res = {}
+                            for _, v in ipairs(arg) do
+                                table.insert(res, v)
+                            end
+                            return res
+                        end,
+                        logic = {echo = array(array(1, 2, 3, 4, 5))},
+                        expected = array(array(1, 2, 3, 4, 5))
+                    },
+                    {
+                        new_op_name = 'first',
+                        new_op = function(_, ...)
+                            -- return first parameter
+                            return arg[1]
+                        end,
+                        logic = {first = array(5, 4, 3, 2, 1)},
+                        expected = 5
+                    }
+                }
+                it(
+                    'should call the new operation correctly',
+                    function()
+                        for i, t in ipairs(test_table) do
+                            local called = 0
+                            local operation = function(data, ...)
+                                local res = t.new_op(data, ...)
+                                called = called + 1
+                                return res
+                            end
+                            local options = {custom_operations = {}}
+                            options.custom_operations[t.new_op_name] = operation
+                            local res = logic_apply(t.logic, nil, options)
+                            assert.message('the new operation was not called once').are.equal(1, called)
+                            assert.message('failed at index: ' .. i).are.same(t.expected, res)
+                        end
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    'json-logic custom nil value',
+    function()
+        -- some json decoder (e.g. lua cjson) use a custom value to represent json null instead of using lua nil value
+        local custom_nil = {}
+        local null = function()
+            return custom_nil
+        end
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                assert.message('failed at index: ' .. i).are.equal(
+                    t.expected,
+                    logic_apply(t.logic, t.data, {null = null})
+                )
+            end
+        end
+
+        describe(
+            'given a logic with custom null function',
+            function()
+                local kv_data = {}
+                local test_table = {
+                    {logic = {var = 'attr3'}, data = {}, expected = custom_nil},
+                    {logic = {var = custom_nil}, data = kv_data, expected = kv_data},
+                    {logic = logic.new_logic('!', custom_nil), data = {}, expected = true},
+                    {logic = logic.new_logic('!!', custom_nil), data = {}, expected = false}
+                }
+                it(
+                    'should return custom nil value as defined in the null function',
+                    function()
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    'json-logic nested operations',
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply(t.logic, t.data, {custom_operations = t.op})
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe(
+            'given nested custom operations',
+            function()
+                it(
+                    'should invoke the right operations',
+                    function()
+                        local test_table = {
+                            {
+                                logic = {['req.get_method'] = {}},
+                                op = {
+                                    req = {
+                                        get_method = function()
+                                            return 'GET'
+                                        end
+                                    }
+                                },
+                                expected = 'GET'
+                            }
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
+
+describe(
+    'json-logic literal',
+    function()
+        local function logic_test(test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply(t.logic, t.data)
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe(
+            'given _ operation',
+            function()
+                local lit = {some_data = {test = 'test'}}
+                it(
+                    'should treat value as literal',
+                    function()
+                        local test_table = {
+                            {
+                                logic = {['_'] = lit},
+                                expected = lit
+                            },
+                            {
+                                logic = {
+                                    ["if"] = {
+                                        true,
+                                        {['_'] = lit}
+                                    }
+                                },
+                                expected = lit
+                            }
+                        }
+                        logic_test(test_table)
+                    end
+                )
+            end
+        )
+    end
+)
