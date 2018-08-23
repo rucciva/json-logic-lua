@@ -2467,23 +2467,24 @@ describe(
         describe(
             'given _ operation',
             function()
-                local lit = {some_data = {test = 'test'}}
+                local escaped = {['if'] = {true, 'test'}}
                 it(
                     'should treat value as literal',
                     function()
                         local test_table = {
                             {
-                                logic = {['_'] = lit},
-                                expected = lit
+                                logic = {['_'] = escaped},
+                                expected = escaped
                             },
                             {
                                 logic = {
-                                    ["if"] = {
-                                        true,
-                                        {['_'] = lit}
+                                    ['if'] = {
+                                        false,
+                                        'false',
+                                        {['_'] = escaped}
                                     }
                                 },
-                                expected = lit
+                                expected = escaped
                             }
                         }
                         logic_test(test_table)
