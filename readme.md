@@ -33,3 +33,15 @@ Luarocks url: <https://luarocks.org/modules/rucciva/json-logic-lua>.
     - whitelist mode (can only be activated when **blacklist** key does not exist in the third parameter)
         - key : **whitelist**
         - contents: a lua table that contains list of operation names that will be enabled. **all else will be disabled**
+1. operator `_` are used to escape operand and treat it as literal. e.g.: 
+
+```javascript
+    {
+        "_" : {
+            "map" : [
+                41.40338,
+                2.17403
+            ]
+        }
+    }
+```
