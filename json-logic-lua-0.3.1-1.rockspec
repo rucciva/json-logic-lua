@@ -1,7 +1,7 @@
 package = "json-logic-lua"
 version = "0.3.1-1"
 source = {
-   url = "https://git.rucciva.one/rucciva/json-logic-lua",
+   url = "git://git.rucciva.one/rucciva/json-logic-lua",
    tag = "0.3.1"
 }
 description = {
