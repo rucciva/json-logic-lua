@@ -1148,9 +1148,7 @@ describe(
         local function logic_test(test_table)
             for i, t in ipairs(test_table) do
                 local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
-                if t.expected ~= t.expected and res ~= res then
-                    -- test nan
-                else
+                if not (t.expected ~= t.expected and res ~= res) then
                     assert.message('failed at index: ' .. i).are.equal(t.expected, res)
                 end
             end
@@ -2340,7 +2338,7 @@ describe(
                         new_op_name = 'echo',
                         new_op = function(_, ...)
                             local res = {}
-                            for _, v in ipairs(arg) do
+                            for _, v in ipairs({...}) do
                                 table.insert(res, v)
                             end
                             return res
@@ -2352,6 +2350,7 @@ describe(
                         new_op_name = 'first',
                         new_op = function(_, ...)
                             -- return first parameter
+                            local arg = {...}
                             return arg[1]
                         end,
                         logic = {first = array(5, 4, 3, 2, 1)},
