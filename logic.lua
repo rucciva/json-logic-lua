@@ -1,3 +1,7 @@
+local function pack(...)
+    return {n = select('#', ...), ...}
+end
+
 local array_mt = {}
 
 local function mark_as_array(tab)
@@ -237,6 +241,7 @@ operations['<='] = function(closure, a, b, c)
 end
 
 operations['+'] = function(closure, ...)
+    local arg = pack(...)
     local a = 0
     for i, v in ipairs(arg) do
         if i == 1 and type(v) == 'string' and #arg > 1 then
@@ -258,6 +263,7 @@ operations['+'] = function(closure, ...)
 end
 
 operations['*'] = function(closure, ...)
+    local arg = pack(...)
     local a = 1
     for _, v in ipairs(arg) do
         a = a * js_to_number(closure, v)
@@ -287,6 +293,7 @@ operations['%'] = function(closure, a, b)
 end
 
 operations['min'] = function(closure, ...)
+    local arg = pack(...)
     for i, v in ipairs(arg) do
         v = js_to_number(closure, v)
         if v ~= v then
@@ -298,6 +305,7 @@ operations['min'] = function(closure, ...)
 end
 
 operations['max'] = function(closure, ...)
+    local arg = pack(...)
     for i, v in ipairs(arg) do
         v = js_to_number(closure, v)
         if v ~= v then
@@ -335,6 +343,7 @@ operations['in'] = function(closure, a, b)
 end
 
 operations['cat'] = function(closure, ...)
+    local arg = pack(...)
     arg['n'] = nil
     local res = ''
     for _, v in ipairs(arg) do
@@ -362,6 +371,7 @@ operations['substr'] = function(closure, source, st, en)
 end
 
 operations['merge'] = function(closure, ...)
+    local arg = pack(...)
     if #arg < 1 then
         return closure.opts.array()
     end
@@ -415,6 +425,7 @@ operations['var'] = function(closure, attr, default)
 end
 
 operations['missing'] = function(closure, ...)
+    local arg = pack(...)
     local missing = closure.opts.array()
     local keys = arg
     if closure.opts.is_array(keys[1]) then
@@ -441,7 +452,7 @@ end
 
 operations['method'] = function(closure, obj, method, ...)
     if obj ~= nil and method ~= nil then
-        return obj[method](obj, unpack(arg))
+        return obj[method](obj, ...)
     end
     return closure.opts.null()
 end
