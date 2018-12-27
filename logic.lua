@@ -344,7 +344,6 @@ end
 
 operations['cat'] = function(closure, ...)
     local arg = pack(...)
-    arg['n'] = nil
     local res = ''
     for _, v in ipairs(arg) do
         res = res .. js_to_string(closure, v)
