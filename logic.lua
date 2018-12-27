@@ -243,8 +243,9 @@ end
 operations['+'] = function(closure, ...)
     local arg = pack(...)
     local a = 0
-    for i, v in ipairs(arg) do
-        if i == 1 and type(v) == 'string' and #arg > 1 then
+    for i = 1, arg.n do
+        local v = arg[i]
+        if i == 1 and type(v) == 'string' and arg.n > 1 then
             a = ''
         end
 
@@ -265,7 +266,8 @@ end
 operations['*'] = function(closure, ...)
     local arg = pack(...)
     local a = 1
-    for _, v in ipairs(arg) do
+    for i = 1, arg.n do
+        local v = arg[i]
         a = a * js_to_number(closure, v)
     end
     return a
@@ -294,7 +296,8 @@ end
 
 operations['min'] = function(closure, ...)
     local arg = pack(...)
-    for i, v in ipairs(arg) do
+    for i = 1, arg.n do
+        local v = arg[i]
         v = js_to_number(closure, v)
         if v ~= v then
             return v
@@ -306,7 +309,8 @@ end
 
 operations['max'] = function(closure, ...)
     local arg = pack(...)
-    for i, v in ipairs(arg) do
+    for i = 1, arg.n do
+        local v = arg[i]
         v = js_to_number(closure, v)
         if v ~= v then
             return v
@@ -345,7 +349,8 @@ end
 operations['cat'] = function(closure, ...)
     local arg = pack(...)
     local res = ''
-    for _, v in ipairs(arg) do
+    for i = 1, arg.n do
+        local v = arg[i]
         res = res .. js_to_string(closure, v)
     end
     return res
@@ -371,12 +376,13 @@ end
 
 operations['merge'] = function(closure, ...)
     local arg = pack(...)
-    if #arg < 1 then
+    if arg.n < 1 then
         return closure.opts.array()
     end
 
     local res = closure.opts.array()
-    for _, v in ipairs(arg) do
+    for i = 1, arg.n do
+        local v = arg[i]
         if not closure.opts.is_array(v) then
             table.insert(res, v)
         else
@@ -431,7 +437,8 @@ operations['missing'] = function(closure, ...)
         keys = keys[1]
     end
 
-    for _, attr in ipairs(keys) do
+    for i = 1, keys.n or #keys do
+        local attr = keys[i]
         local val = operations.var(closure, attr)
         if closure.opts.is_nil(val) or val == '' then
             table.insert(missing, attr)
