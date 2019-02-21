@@ -498,7 +498,7 @@ operations['typeof'] = function(_, v)
     if t == 'nil' then
         return 'undefined'
     end
-    if t == 'table' then
+    if t == 'table' or t == 'userdata' or t == 'thread' then
         return 'object'
     end
     return t
