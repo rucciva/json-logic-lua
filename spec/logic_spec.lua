@@ -1008,9 +1008,12 @@ describe(
 )
 
 describe("json-logic 'typeof' test", function()
+    local function js_null() end
+    local function null () return js_null end
+
     local function logic_test(test_table)
         for i, t in ipairs(test_table) do
-            local res = logic_apply({typeof = t.params}, t.data)
+            local res = logic_apply({typeof = t.params}, t.data, {null = null})
             assert.message('failed at index: ' .. i).are.same(t.expected, res)
         end
     end
@@ -1029,6 +1032,7 @@ describe("json-logic 'typeof' test", function()
                     {params = array( {a= 1} ), expected = 'object'},
                     {params = array( array(1) ), expected = 'object'},
                     {params = array( function()end ), expected = 'function'},
+                    {params = array( js_null ), expected = 'object'},
                 }
                 it(
                     'should tell the type of the value',

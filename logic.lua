@@ -494,7 +494,7 @@ operations['length'] = function(_, obj)
 end
 
 operations['typeof'] = function(closure, v)
-    if closure.opts.null == v then
+    if closure.opts.null() == v then
         return 'object'
     end
 
