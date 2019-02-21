@@ -493,7 +493,11 @@ operations['length'] = function(_, obj)
     return 0
 end
 
-operations['typeof'] = function(_, v)
+operations['typeof'] = function(closure, v)
+    if closure.opts.null == v then
+        return 'object'
+    end
+
     local t = type(v)
     if t == 'nil' then
         return 'undefined'
