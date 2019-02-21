@@ -1007,6 +1007,76 @@ describe(
     end
 )
 
+describe("json-logic 'typeof' test", function()
+    local function logic_test(test_table)
+        for i, t in ipairs(test_table) do
+            local res = logic_apply({typeof = t.params}, t.data)
+            assert.message('failed at index: ' .. i).are.same(t.expected, res)
+        end
+    end
+    describe(
+            'given a value',
+            function()
+                local test_table = {
+                    {params = array( 37 ), expected = 'number'},
+                    {params = array( 0/0 ), expected = 'number'},
+                    {params = array( '' ), expected = 'string'},
+                    {params = array( 'bla' ), expected = 'string'},
+                    {params = array( true ), expected = 'boolean'},
+                    {params = array( false ), expected = 'boolean'},
+                    {params = array( undefined ), expected = 'undefined'},
+                    {params = array( undeclaredVariable ), expected = 'undefined'},
+                    {params = array( {a= 1} ), expected = 'object'},
+                    {params = array( array(1) ), expected = 'object'},
+                    {params = array( function()end ), expected = 'function'},
+                }
+                it(
+                    'should tell the type of the value',
+                    function()
+                        logic_test(test_table)
+                    end
+                )
+            end
+    )
+end)
+
+describe("json-logic 'isArray' or 'is_array' test", function()
+    local function logic_test(test_table)
+        for i, t in ipairs(test_table) do
+            local res = logic_apply({isArray = t.params}, t.data)
+            assert.message('failed at index: ' .. i).are.same(t.expected, res)
+
+            res = logic_apply({is_array = t.params}, t.data)
+            assert.message('failed at index: ' .. i).are.same(t.expected, res)
+        end
+    end
+    describe(
+            'given a value',
+            function()
+                local test_table = {
+                    {params = array( 0 ), expected = false},
+                    {params = array( '' ), expected = false},
+                    {params = array( 'bla' ), expected = false},
+                    {params = array( {} ), expected = false},
+                    {params = array( {1,2,3} ), expected = false},
+                    {params = array( {a= 1} ), expected = false},
+                    {params = array( true ), expected = false},
+                    {params = array( false ), expected = false},
+                    {params = array( undefined ), expected = false},
+                    {params = array( undeclaredVariable ), expected = false},
+                    {params = array( array(4,5,6) ), expected = true},
+                    {params = array( array(4,5,array(1,2,3)) ), expected = true},
+                }
+                it(
+                    'should tell the type of the value',
+                    function()
+                        logic_test(test_table)
+                    end
+                )
+            end
+    )
+end)
+
 describe(
     "json-logic 'join' test",
     function()

@@ -447,7 +447,7 @@ operations['missing'] = function(closure, ...)
     return missing
 end
 
-operations['missing_some'] = function(closure, minimum, keys)
+operations['missingSome'] = function(closure, minimum, keys)
     local missing = operations.missing(closure, unpack(keys))
     if #keys - #missing >= minimum then
         return closure.opts.array()
@@ -492,6 +492,25 @@ operations['length'] = function(_, obj)
 
     return 0
 end
+
+operations['typeof'] = function(_, v)
+    local t = type(v)
+    if t == 'nil' then
+        return 'undefined'
+    end
+    if t == 'table' then
+        return 'object'
+    end
+    return t
+end
+
+operations['isArray'] = function(closure, v)
+    return closure.opts.is_array(v)
+end
+
+-- snake-case alias to be compatible with original json logic
+operations['missing_some'] = operations['missingSome']
+operations['is_array'] = operations['isArray']
 
 local function get_operator(tab)
     for k, _ in pairs(tab) do
@@ -562,8 +581,7 @@ local recurser = {}
 -- If the first evaluates falsy, jump to the next pair (e.g, 0,1 to 2,3)
 -- given one parameter, evaluate and return it. (it's an Else and all the If/ElseIf were false)
 -- given 0 parameters, return NULL (not great practice, but there was no Else)
-recurser['if'] =
-    function(stack, closure, last_child_result)
+recurser['if'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero or one length
@@ -611,8 +629,7 @@ end
 
 recurser['?:'] = recurser['if']
 
-recurser['and'] =
-    function(stack, closure, last_child_result)
+recurser['and'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -657,8 +674,7 @@ recurser['and'] =
     return closure, last_child_result
 end
 
-recurser['or'] =
-    function(stack, closure, last_child_result)
+recurser['or'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -704,8 +720,7 @@ recurser['or'] =
     return closure, last_child_result
 end
 
-recurser['filter'] =
-    function(stack, closure, last_child_result)
+recurser['filter'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -770,8 +785,7 @@ recurser['filter'] =
     return closure, last_child_result
 end
 
-recurser['map'] =
-    function(stack, closure, last_child_result)
+recurser['map'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -838,8 +852,7 @@ recurser['map'] =
     return closure, last_child_result
 end
 
-recurser['reduce'] =
-    function(stack, closure, last_child_result)
+recurser['reduce'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
     -- zero length
     if #closure.logic[op] == 0 then
@@ -909,8 +922,7 @@ recurser['reduce'] =
     return closure, last_child_result
 end
 
-recurser['all'] =
-    function(stack, closure, last_child_result)
+recurser['all'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -976,8 +988,7 @@ recurser['all'] =
     return closure, last_child_result
 end
 
-recurser['some'] =
-    function(stack, closure, last_child_result)
+recurser['some'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
 
     -- zero length
@@ -1042,8 +1053,7 @@ recurser['some'] =
     return closure, last_child_result
 end
 
-recurser['none'] =
-    function(stack, closure, last_child_result)
+recurser['none'] = function(stack, closure, last_child_result)
     local op = get_operator(closure.logic)
     -- zero length
     if #closure.logic[op] == 0 then
