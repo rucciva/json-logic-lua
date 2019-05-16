@@ -1,8 +1,8 @@
 package = "json-logic-lua"
-version = "0.4.0-1"
+version = "0.5.0-1"
 source = {
    url = "git://git.rucciva.one/rucciva/json-logic-lua",
-   tag = "0.4.0"
+   tag = "0.5.0"
 }
 description = {
    summary = "json-logic lua port",
