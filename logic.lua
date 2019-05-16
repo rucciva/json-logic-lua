@@ -512,6 +512,20 @@ operations['isArray'] = function(closure, v)
     return closure.opts.is_array(v)
 end
 
+operations['toUpperCase'] = function(_, v)
+    if type(v) ~= "string" then
+        return nil
+    end
+    return string.upper(v)
+end
+
+operations['toLowerCase'] = function(_, v)
+    if type(v) ~= "string" then
+        return nil
+    end
+    return string.lower(v)
+end
+
 -- snake-case alias to be compatible with original json logic
 operations['missing_some'] = operations['missingSome']
 operations['is_array'] = operations['isArray']

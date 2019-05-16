@@ -1217,6 +1217,36 @@ describe(
 )
 
 describe(
+    'json-logic string lower upper test',
+    function()
+        local function logic_test( test_table)
+            for i, t in ipairs(test_table) do
+                local res = logic_apply(logic.new_logic(t.operator, t.params), t.data)
+                assert.message('failed at index: ' .. i).are.equal(t.expected, res)
+            end
+        end
+        describe('given a string', function()
+            local test_table = {
+                { operator = "toUpperCase", params = "something",  expected = "SOMETHING"},
+                { operator = "toUpperCase", params = "SOMETHING",  expected = "SOMETHING"},
+                { operator = "toUpperCase", params = "SomeThing",  expected = "SOMETHING"},
+                { operator = "toUpperCase", params = "someTHING",  expected = "SOMETHING"},
+                { operator = "toUpperCase", params = "sOmEtHiNg",  expected = "SOMETHING"},
+                { operator = "toLowerCase", params = "something",  expected = "something"},
+                { operator = "toLowerCase", params = "SOMETHING",  expected = "something"},
+                { operator = "toLowerCase", params = "SomeThing",  expected = "something"},
+                { operator = "toLowerCase", params = "someTHING",  expected = "something"},
+                { operator = "toLowerCase", params = "sOmEtHiNg",  expected = "something"},
+            }
+            it('should correctly convert all character to uppercase or lowercase', function()
+                logic_test(test_table)
+            end)
+        end
+    )
+    end
+)
+
+describe(
     'json-logic number test',
     function()
         local function logic_test(test_table)
