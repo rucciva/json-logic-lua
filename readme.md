@@ -45,3 +45,136 @@ Luarocks url: <https://luarocks.org/modules/rucciva/json-logic-lua>.
         }
     }
 ```
+
+# API
+
+- [cat](#cat)
+- [in](#in)
+- [is_array](#is_array)
+- [isArray](#isarray)
+- [join](#join)
+- [length](#length)
+- [log](#max)
+- [max](#max)
+- [merge](#merge)
+- [min](#min)
+- [missing](#missing)
+- [missing_some](#missing_some)
+- [missingSome](#missingsome)
+- [substr](#substr)
+- [toLowerCase](#tolowercase)
+- [toUpperCase](#touppercase)
+- [typeof](#typeof)
+- [var](#var)
+
+
+cat
+---
+**syntax:** `{"cat": ["I love", " pie"]}`
+
+Concatenate all the supplied arguments.
+
+in
+---
+**syntax:** `{"in":[ "Ringo", ["John", "Paul", "George", "Ringo"] ]}`
+
+**syntax:** `{"in":["Spring", "Springfield"]}`
+
+If the second argument is an array, tests that the first argument is a member of the array.
+If the second argument is a string, tests that the first argument is a substring.
+
+is_array
+--------
+See [isArray](#isarray)
+
+isArray
+-------
+**syntax:** `{"isArray": [a]}`
+
+Returns `true` if the given param is an array.
+
+join
+----
+**syntax:** `{"join": ["a", "b", "c", ...]}`
+
+length
+------
+**syntax:** `{"length": ["Hello, World!"]}`
+
+**syntax:** `{"length": [[a, b, c, ...]]}`
+
+Return length of the given string or table.
+
+log
+---
+**syntax:** `{"log": a}`
+
+Writes to standard output.
+
+max
+---
+**syntax:** `{"max": [a, b, c, ...]}`
+
+Find the minimum value from the given params.
+
+merge
+-----
+**syntax:** `{"merge": [a, b, c, ...]}`
+
+**syntax:** `{"merge": [ [1,2], [3,4] ]}`
+
+Takes one or more arrays, and merges them into one array. If arguments aren’t arrays, they get cast to arrays.
+
+min
+---
+**syntax:** `{"min": [a, b, c, ...]}`
+
+Find the minimum value from the given params.
+
+missing
+-------
+**syntax:** `{"missing":["a", "b"]}`
+
+Takes an array of data keys to search for (same format as `var`). Returns an array of any keys that are missing from the data object, or an empty array.
+
+missing_some
+------------
+See [missingSome](#missingsome)
+
+missingSome
+-----------
+**syntax:** `{"missing_some":[1, ["a", "b", "c"]]}`
+
+Takes a minimum number of data keys that are required, and an array of keys to search for (same format as var or missing). Returns an empty array if the minimum is met, or an array of the missing keys otherwise.
+
+substr
+------
+**syntax:** `{"substr": [source, st, en]}`
+
+Returns a part of `source`, from specified `st` to `en`.
+
+toLowerCase
+-----------
+**syntax:** `{"toLowerCase": [str]}`
+
+Returns the lower-cased letters of the given string.
+
+toUpperCase
+-----------
+**syntax:** `{"toUpperCase": [str]}`
+
+Returns the upper-cased letters of the given string.
+
+typeof
+------
+**syntax:** `{"typeof": [a]}`
+
+Returns type of `a`.
+
+var
+---
+**syntax:** `{"var": ["a"]}`
+
+Retrieve data from the provided data object.
+
+
