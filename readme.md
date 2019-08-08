@@ -138,29 +138,6 @@ Takes an array of data keys to search for (same format as `var`). Returns an arr
   </tr>
 </table>
 
-Note, in JsonLogic, empty arrays are falsy. So you can use `missing` with `if` like:
-
-<table>
-  <tr>
-    <td><b>Logic</b></td>
-    <td>
-<pre><code>{"if":[
-  {"missing":["a", "b"]},
-  "Not enough fruit",
-  "OK to proceed"
-]}</code></pre>
-    </td>
-  </tr>
-  <tr>
-    <td><b>Data</b></td>
-    <td><code>{"a":"apple", "b":"banana"}</code></td>
-  </tr>
-  <tr>
-    <td><b>Result</b></td>
-    <td><code>"OK to proceed"</code></td>
-  </tr>
-</table>
-
 ### `missing_some`
 See [missingSome](#missingsome)
 
@@ -558,13 +535,11 @@ Logical negation ("not"). Takes just one argument.
 
 Double negation, or "cast to a boolean." Takes a single argument.
 
-Note that JsonLogic has its own spec for truthy to ensure that rules will run consistently across interpreters. (e.g., empty arrays are falsy, string `"0"` is truthy.)
-
 <table>
   <tr>
     <td><b>Logic</b></td>
     <td>
-      <code>{"!!": [ [] ] }</code>
+      <code>{"!!": [ false ] }</code>
     </td>
   </tr>
   <tr>
@@ -574,24 +549,6 @@ Note that JsonLogic has its own spec for truthy to ensure that rules will run co
   <tr>
     <td><b>Result</b></td>
     <td><code>false</code></td>
-  </tr>
-</table>
-
-
-<table>
-  <tr>
-    <td><b>Logic</b></td>
-    <td>
-      <code>{"!!": ["0"] }</code>
-    </td>
-  </tr>
-  <tr>
-    <td><b>Data</b></td>
-    <td><code>null</code></td>
-  </tr>
-  <tr>
-    <td><b>Result</b></td>
-    <td><code>true</code></td>
   </tr>
 </table>
 
